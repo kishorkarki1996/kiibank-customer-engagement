@@ -55,7 +55,7 @@ export default function CustomerEngagementPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/customer-engagement/new">
+          <Link href="/customer-engagement/create">
             <Plus className="mr-2 size-4" />
             Create engagement
           </Link>

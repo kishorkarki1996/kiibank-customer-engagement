@@ -17,7 +17,7 @@ export function CreateCustomerEngagementHeader() {
         />
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button variant="ghost" size="sm">
               <X className="size-4" />
             </Button>

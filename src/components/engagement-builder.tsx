@@ -23,7 +23,18 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-
+import { AppSelect } from "./common/app-select";
+const priorityOptions = [
+  { label: "Critical", value: "critical" },
+  { label: "High", value: "high" },
+  { label: "Normal", value: "normal" },
+  { label: "Low", value: "low" },
+];
+const ownerOptions = [
+  { label: "Customer Experience Team", value: "customerExperienceTeam" },
+  { label: "Marketing Team", value: "marketingTeam" },
+  { label: "Compliance Operations", value: "complianceOperations" },
+];
 const categories = [
   {
     name: "Onboarding & Lifecycle",
@@ -253,39 +264,27 @@ function Basic({
     <div className="space-y-7">
       <div className="grid gap-5 md:grid-cols-2">
         <Field label="Engagement name" required>
-          <Input
-            defaultValue="New Customer Welcome Journey"
-            placeholder="Enter a clear internal name"
-          />
+          <Input placeholder="E.g. New Customer Welcome Journey" />
         </Field>
         <Field label="Owner" required>
-          <NativeSelect>
-            <option>Customer Experience Team</option>
-            <option>Marketing Team</option>
-            <option>Compliance Operations</option>
-          </NativeSelect>
+          <AppSelect placeholder="Select" options={ownerOptions} />
         </Field>
         <div className="md:col-span-2">
           <Field label="Description">
             <Textarea
               placeholder="Describe the purpose of this engagement..."
-              defaultValue="Guide newly registered customers through their first KiiBank actions."
+              maxLength={200}
             />
           </Field>
         </div>
         <Field label="Priority" required>
-          <NativeSelect defaultValue="Normal">
-            <option>Critical</option>
-            <option>High</option>
-            <option>Normal</option>
-            <option>Low</option>
-          </NativeSelect>
+          <AppSelect placeholder="Select" options={priorityOptions} />
         </Field>
       </div>
       <div>
         <div className="mb-3">
           <Label>
-            Category <span className="text-rose-500">*</span>
+            Category <span className="text-destructive">*</span>
           </Label>
           <p className="mt-1 text-xs text-slate-500">
             Category determines the targeting and configuration options

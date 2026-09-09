@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export type AppSelectOption = {
@@ -26,17 +27,23 @@ export type AppSelectGroup = {
 };
 
 type SelectProps = ComponentProps<typeof Select>;
+
 type SelectTriggerProps = ComponentProps<typeof SelectTrigger>;
+
 type SelectContentProps = ComponentProps<typeof SelectContent>;
 
 type AppSelectProps = SelectProps & {
   options?: AppSelectOption[];
   groups?: AppSelectGroup[];
 
+  label?: string;
+
   placeholder?: string;
 
   triggerClassName?: string;
+
   triggerProps?: Omit<SelectTriggerProps, "children">;
+
   contentProps?: SelectContentProps;
 
   children?: ReactNode;
@@ -45,6 +52,7 @@ type AppSelectProps = SelectProps & {
 export function AppSelect({
   options,
   groups,
+  label,
   placeholder = "Select an option",
   triggerClassName,
   triggerProps,
@@ -53,20 +61,36 @@ export function AppSelect({
   ...selectProps
 }: AppSelectProps) {
   return (
-    <Select {...selectProps}>
-      <SelectTrigger
-        {...triggerProps}
-        className={cn("w-full", triggerClassName, triggerProps?.className)}
-      >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
+    <div className="space-y-2">
+      {label && <Label>{label}</Label>}
 
-      <SelectContent {...contentProps}>
-        {groups?.map((group, index) => (
-          <SelectGroup key={`${group.label}-${index}`}>
-            {group.label && <SelectLabel>{group.label}</SelectLabel>}
+      <Select {...selectProps}>
+        <SelectTrigger
+          {...triggerProps}
+          className={cn("w-full", triggerClassName, triggerProps?.className)}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
 
-            {group.options.map((option) => (
+        <SelectContent {...contentProps}>
+          {groups?.map((group, index) => (
+            <SelectGroup key={`${group.label}-${index}`}>
+              {group.label && <SelectLabel>{group.label}</SelectLabel>}
+
+              {group.options.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          ))}
+
+          {!groups &&
+            options?.map((option) => (
               <SelectItem
                 key={option.value}
                 value={option.value}
@@ -75,22 +99,10 @@ export function AppSelect({
                 {option.label}
               </SelectItem>
             ))}
-          </SelectGroup>
-        ))}
 
-        {!groups &&
-          options?.map((option) => (
-            <SelectItem
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </SelectItem>
-          ))}
-
-        {children}
-      </SelectContent>
-    </Select>
+          {children}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
