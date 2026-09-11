@@ -1,11 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
-  ChevronRight,
   Clock3,
   Eye,
   Info,
@@ -79,7 +76,7 @@ const categories = [
 ];
 const steps = [
   "Basic information",
-  "Audience",
+  "Customer audience",
   "Trigger & rules",
   "Journey",
   "Review",
