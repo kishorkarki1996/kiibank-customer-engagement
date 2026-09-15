@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
-  LayoutDashboard,
-  Logs,
-  RotateCcw,
-  SquareTerminal,
-} from "lucide-react";
+import { LayoutDashboard, Logs, RotateCcw, Users } from "lucide-react";
 import * as React from "react";
 
 import { Sidebar, SidebarContent, SidebarRail } from "@/components/ui/sidebar";
@@ -25,7 +17,7 @@ const data = {
     {
       title: "Engagements",
       url: "#",
-      icon: SquareTerminal,
+      icon: Users,
       isActive: true,
       items: [
         {
