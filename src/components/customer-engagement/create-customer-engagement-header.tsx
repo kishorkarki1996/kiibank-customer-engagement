@@ -50,7 +50,7 @@ export function CreateCustomerEngagementHeader() {
   const handleDiscardAndExit = () => {
     setExitOpen(false);
 
-    router.push("/customer-engagement");
+    router.push("/customer-engagement/engagements/onboarding-lifecycle");
   };
 
   return (

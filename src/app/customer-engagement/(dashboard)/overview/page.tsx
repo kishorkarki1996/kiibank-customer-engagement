@@ -39,27 +39,21 @@ const metrics = [
   },
 ];
 
-export default function CustomerEngagementPage() {
+export default function OverviewPage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">
-            Customer Engagement
-          </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
             Engagement overview
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create, automate and monitor customer communications from one place.
-          </p>
         </div>
-        <Button asChild>
+        {/* <Button asChild>
           <Link href="/customer-engagement/create">
             <Plus className="mr-2 size-4" />
             Create engagement
           </Link>
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -81,26 +75,6 @@ export default function CustomerEngagementPage() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-primary/15 bg-gradient-to-r from-primary/8 to-white p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="font-semibold">
-              Build targeted engagement journeys
-            </div>
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Choose a category, define who qualifies, configure triggers and
-              communication steps, then preview the final audience before
-              activation.
-            </p>
-          </div>
-          <Button variant="outline" asChild>
-            <Link href="/customer-engagement/engagements/new">
-              Open builder <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
-        </div>
-      </div>
-
       <div>
         <div className="mb-3 flex items-center justify-between">
           <div>
@@ -109,9 +83,9 @@ export default function CustomerEngagementPage() {
               Latest customer journeys and operational communications.
             </p>
           </div>
-          <Button variant="ghost" size="sm" asChild>
+          {/* <Button variant="ghost" size="sm" asChild>
             <Link href="/customer-engagement/engagements">View all</Link>
-          </Button>
+          </Button> */}
         </div>
         <EngagementTable />
       </div>

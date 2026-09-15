@@ -1,5 +1,5 @@
-import { OnboardingBuilder } from "@/components/customer-engagement/create/onboarding-and-lifecycle/onboarding-builder";
+import { TransactionBehaviourBuilder } from "@/components/customer-engagement/create/transaction-behaviour/transaction-behaviour-builder";
 
 export default function TransactionBehaviourPage() {
-  return <OnboardingBuilder />;
+  return <TransactionBehaviourBuilder />;
 }

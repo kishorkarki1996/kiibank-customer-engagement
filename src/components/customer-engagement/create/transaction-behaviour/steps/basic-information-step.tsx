@@ -4,7 +4,7 @@ import Category from "@/components/customer-engagement/create/shared/basic-infor
 import Owner from "@/components/customer-engagement/create/shared/basic-information/owner";
 import Priority from "@/components/customer-engagement/create/shared/basic-information/priority";
 
-const DEFAULT_CATEGORY = "onboarding-lifecycle";
+const DEFAULT_CATEGORY = "transaction-behaviour";
 const OWNER = "John Doe";
 
 export function BasicInformationStep() {

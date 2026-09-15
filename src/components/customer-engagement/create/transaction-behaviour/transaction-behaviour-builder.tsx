@@ -21,15 +21,16 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EngagementStepper } from "../engagement-stepper";
 import { StepActions } from "../step-actions";
 import { StepHeader } from "../step-header";
+import { BasicInformationStep } from "./steps/basic-information-step";
+import { CustomerAudienceStep } from "./steps/customer-audience-step";
 
-import { BasicInformationStep } from "./steps/basic-information";
-import { CustomerAudienceStep } from "./steps/customer-audience";
-import { EntryTriggerStep } from "./steps/entry-trigger";
-import { JourneyStep } from "./steps/journey-step";
-import { CommunicationControlsStep } from "./steps/communication-control-step";
-import { PreviewStep } from "./steps/preview-step";
-import { TestStep } from "./steps/test-step";
-import { ReviewActivateStep } from "./steps/review-activate-step";
+// import { AudienceStep } from "./steps/audience";
+// import { EntryTriggerStep } from "./steps/entry-trigger";
+// import { JourneyStep } from "./steps/journey-step";
+// import { CommunicationControlsStep } from "./steps/communication-control-step";
+// import { PreviewStep } from "./steps/preview-step";
+// import { TestStep } from "./steps/test-step";
+// import { ReviewActivateStep } from "./steps/review-activate-step";
 
 const steps = [
   {
@@ -66,7 +67,7 @@ const steps = [
   },
 ];
 
-export function OnboardingBuilder() {
+export function TransactionBehaviourBuilder() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -184,7 +185,7 @@ export function OnboardingBuilder() {
 
             {currentStep === 1 && <CustomerAudienceStep />}
 
-            {currentStep === 2 && <EntryTriggerStep />}
+            {/* {currentStep === 2 && <EntryTriggerStep />}
 
             {currentStep === 3 && <JourneyStep />}
 
@@ -194,7 +195,7 @@ export function OnboardingBuilder() {
 
             {currentStep === 6 && <TestStep />}
 
-            {currentStep === 7 && <ReviewActivateStep />}
+            {currentStep === 7 && <ReviewActivateStep />} */}
           </div>
 
           <StepActions
