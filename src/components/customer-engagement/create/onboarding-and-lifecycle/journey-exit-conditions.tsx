@@ -71,7 +71,7 @@ export function JourneyExitConditions() {
         <p className="text-sm font-medium">Journey completed</p>
 
         <p className="mt-1 text-xs text-muted-foreground">
-          Always included. The customer exits after the final journey step.
+          The customer exits after the final journey step.
         </p>
       </div>
 

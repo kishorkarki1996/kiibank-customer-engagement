@@ -83,7 +83,7 @@ export function JourneyMessageCondition({
   return (
     <div className="space-y-4 rounded-lg border p-4">
       <div className="space-y-3">
-        <Label>Send this message only if...</Label>
+        <Label>Step Condition</Label>
 
         <RadioGroup
           value={mode}
@@ -123,9 +123,10 @@ export function JourneyMessageCondition({
             return (
               <div
                 key={condition.id}
-                className="grid items-center gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_40px]"
+                className="grid items-end gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_40px]"
               >
                 <AppSelect
+                  label="Send this message only if"
                   value={condition.field}
                   onValueChange={(value) =>
                     updateCondition(condition.id, {
@@ -145,6 +146,7 @@ export function JourneyMessageCondition({
                 {selectedCondition?.operatorOptions &&
                 selectedCondition.operatorOptions.length > 0 ? (
                   <AppSelect
+                    label="Operator"
                     value={condition.operator}
                     onValueChange={(value) =>
                       updateCondition(condition.id, {
@@ -159,21 +161,24 @@ export function JourneyMessageCondition({
                 )}
 
                 {selectedCondition?.valueField.type === "input" ? (
-                  <Input
-                    type={selectedCondition.valueField.inputType}
-                    min={
-                      selectedCondition.valueField.inputType === "number"
-                        ? 0
-                        : undefined
-                    }
-                    value={condition.value}
-                    onChange={(event) =>
-                      updateCondition(condition.id, {
-                        value: event.target.value,
-                      })
-                    }
-                    placeholder={selectedCondition.valueField.placeholder}
-                  />
+                  <div className="space-y-2">
+                    <Label>Count</Label>
+                    <Input
+                      type={selectedCondition.valueField.inputType}
+                      min={
+                        selectedCondition.valueField.inputType === "number"
+                          ? 0
+                          : undefined
+                      }
+                      value={condition.value}
+                      onChange={(event) =>
+                        updateCondition(condition.id, {
+                          value: event.target.value,
+                        })
+                      }
+                      placeholder={selectedCondition.valueField.placeholder}
+                    />
+                  </div>
                 ) : selectedCondition?.valueField.type === "select" ? (
                   <AppSelect
                     value={condition.value}

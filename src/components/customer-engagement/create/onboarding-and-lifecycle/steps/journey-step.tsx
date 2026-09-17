@@ -28,7 +28,7 @@ type JourneyStepItem = {
   conditions: JourneyCondition[];
 };
 
-const sendOptions = [
+const actionOptions = [
   {
     label: "Immediately after entry",
     value: "immediately",
@@ -86,10 +86,6 @@ const channelOptions = [
 ];
 
 const fallbackOptions = [
-  {
-    label: "None",
-    value: "none",
-  },
   {
     label: "Push Notification",
     value: "push",
@@ -164,7 +160,7 @@ export function JourneyStep() {
   const [initialConditions, setInitialConditions] = useState<
     JourneyCondition[]
   >([]);
-  const [send, setSend] = useState("immediately");
+  const [action, setAction] = useState("immediately");
 
   const [initialWaitValue, setInitialWaitValue] = useState(1);
 
@@ -173,13 +169,13 @@ export function JourneyStep() {
 
   const [initialTemplate, setInitialTemplate] = useState("welcome-to-kiibank");
 
-  const [initialChannel, setInitialChannel] = useState("push");
+  const [initialChannel, setInitialChannel] = useState("");
 
-  const [initialFallback, setInitialFallback] = useState("none");
+  const [initialFallback, setInitialFallback] = useState("");
 
   const [journeySteps, setJourneySteps] = useState<JourneyStepItem[]>([]);
 
-  const isInitialDelayed = send === "after-delay";
+  const isInitialDelayed = action === "after-delay";
 
   const initialJourneyDay = isInitialDelayed
     ? convertWaitToDays(initialWaitValue, initialWaitUnit)
@@ -247,21 +243,19 @@ export function JourneyStep() {
         <div className="space-y-5 p-5">
           <div className="grid gap-5 md:grid-cols-2">
             <AppSelect
-              label="Send"
-              value={send}
-              onValueChange={setSend}
+              label="Action Type"
+              value={action}
+              onValueChange={setAction}
               placeholder="Select"
-              options={sendOptions}
+              options={actionOptions}
             />
 
             {isInitialDelayed && (
-              <div className="space-y-2">
-                <Label>
-                  Wait
-                  <span className="ml-1 text-destructive">*</span>
-                </Label>
-
-                <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+              <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+                <div className="space-y-2">
+                  <Label>
+                    Wait Value <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     type="number"
                     min={1}
@@ -270,7 +264,11 @@ export function JourneyStep() {
                       setInitialWaitValue(Number(event.target.value) || 0)
                     }
                   />
-
+                </div>
+                <div className="space-y-2">
+                  <Label>
+                    Wait Unit <span className="text-destructive">*</span>
+                  </Label>
                   <AppSelect
                     value={initialWaitUnit}
                     onValueChange={(value) =>
@@ -293,7 +291,7 @@ export function JourneyStep() {
             </div>
           )}
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-3">
             <AppSelect
               label="Message Template"
               value={initialTemplate}
@@ -355,13 +353,11 @@ export function JourneyStep() {
             </div>
 
             <div className="space-y-5 p-5">
-              <div className="space-y-2">
-                <Label>
-                  Wait
-                  <span className="ml-1 text-destructive">*</span>
-                </Label>
-
-                <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+              <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+                <div className="space-y-2">
+                  <Label>
+                    Wait Value <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     type="number"
                     min={1}
@@ -372,7 +368,11 @@ export function JourneyStep() {
                       })
                     }
                   />
-
+                </div>
+                <div className="space-y-2">
+                  <Label>
+                    Wait Unit <span className="text-destructive">*</span>
+                  </Label>
                   <AppSelect
                     value={step.waitUnit}
                     onValueChange={(value) =>
@@ -403,9 +403,9 @@ export function JourneyStep() {
                 </div>
               </div>
 
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-5 md:grid-cols-3">
                 <AppSelect
-                  label="Then Send"
+                  label="Message Template"
                   value={step.template}
                   onValueChange={(value) =>
                     updateJourneyStep(step.id, {
@@ -451,8 +451,6 @@ export function JourneyStep() {
         <Plus className="mr-2 size-4" />
         Add Journey Step
       </Button>
-
-      <JourneyExitConditions />
     </div>
   );
 }

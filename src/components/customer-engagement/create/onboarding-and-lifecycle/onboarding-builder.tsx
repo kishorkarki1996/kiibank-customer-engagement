@@ -30,6 +30,7 @@ import { CommunicationControlsStep } from "./steps/communication-control-step";
 import { PreviewStep } from "./steps/preview-step";
 import { TestStep } from "./steps/test-step";
 import { ReviewActivateStep } from "./steps/review-activate-step";
+import JourneyExitStep from "./steps/journey-exit";
 
 const steps = [
   {
@@ -47,6 +48,10 @@ const steps = [
   {
     id: "journey",
     label: "Build journey",
+  },
+  {
+    id: "journey-exit",
+    label: "Journey Exit",
   },
   {
     id: "communication-controls",
@@ -176,10 +181,10 @@ export function OnboardingBuilder() {
           onStepChange={setCurrentStep}
         />
 
-        <section className="overflow-hidden rounded-xl border bg-background">
+        <section className="overflow-hidden rounded-xl border bg-background flex flex-col">
           <StepHeader currentStep={currentStep} steps={steps} />
 
-          <div className="p-5 md:p-7">
+          <div className="p-5 md:p-7 flex-1">
             {currentStep === 0 && <BasicInformationStep />}
 
             {currentStep === 1 && <CustomerAudienceStep />}
@@ -188,13 +193,15 @@ export function OnboardingBuilder() {
 
             {currentStep === 3 && <JourneyStep />}
 
-            {currentStep === 4 && <CommunicationControlsStep />}
+            {currentStep === 4 && <JourneyExitStep />}
 
-            {currentStep === 5 && <PreviewStep />}
+            {currentStep === 5 && <CommunicationControlsStep />}
 
-            {currentStep === 6 && <TestStep />}
+            {currentStep === 6 && <PreviewStep />}
 
-            {currentStep === 7 && <ReviewActivateStep />}
+            {currentStep === 7 && <TestStep />}
+
+            {currentStep === 8 && <ReviewActivateStep />}
           </div>
 
           <StepActions
