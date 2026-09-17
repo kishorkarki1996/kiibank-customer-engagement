@@ -222,7 +222,7 @@ export function EntryTriggerStep() {
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
             <p className="text-sm font-medium">
-              Include Customers Who Already Meet This Condition?
+              Include customers who already meet this condition?
             </p>
 
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
