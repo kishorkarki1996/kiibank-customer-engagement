@@ -14,42 +14,15 @@ import { EngagementTable } from "@/components/engagement-table";
 import TransactionBehaviourPage from "@/app/customer-engagement/create/transaction-behaviour/page";
 import { TransactionBehaviourTable } from "./transaction-behaviour-table";
 
-const metrics = [
-  {
-    label: "Active engagements",
-    value: "18",
-    detail: "4 scheduled",
-    icon: Megaphone,
-  },
-  {
-    label: "Customers reached",
-    value: "42.8K",
-    detail: "Last 30 days",
-    icon: MousePointerClick,
-  },
-  {
-    label: "Delivery rate",
-    value: "96.4%",
-    detail: "Across all channels",
-    icon: CheckCircle2,
-  },
-  {
-    label: "Needs review",
-    value: "3",
-    detail: "Draft or paused",
-    icon: Clock3,
-  },
-];
-
 export default function OnboardingLifecyclePage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm text-primary">Engagements</p>
+        <div className="space-y-2">
           <h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">
-            Transaction Behaviour
+            Engagements
           </h1>
+          <p>Category: Transaction Behvaiour</p>
         </div>
         <Button asChild>
           <Link href="/customer-engagement/create/transaction-behaviour">

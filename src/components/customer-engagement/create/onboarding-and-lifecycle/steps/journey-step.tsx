@@ -1,25 +1,31 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import { Clock3, Plus, Trash2 } from "lucide-react";
 
 import { AppSelect } from "@/components/common/app-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import {
   JourneyConditionBlock,
   JourneyMessageCondition,
 } from "@/components/customer-engagement/create/shared/journey-message-condition";
 
-import { JourneyExitConditions } from "../journey-exit-conditions";
+type WaitUnit = "hours" | "days" | "weeks" | "months";
 
 type JourneyStepItem = {
   id: number;
+  action: string;
   waitValue: number;
-  waitUnit: "hours" | "days" | "weeks" | "months";
+  waitUnit: WaitUnit;
   template: string;
   channel: string;
   fallback: string;
@@ -27,6 +33,31 @@ type JourneyStepItem = {
   conditionBlocks: JourneyConditionBlock[];
 };
 
+const getActionOptions = (stepIndex: number) => {
+  if (stepIndex === 0) {
+    return [
+      {
+        label: "Immediately after entry",
+        value: "immediately",
+      },
+      {
+        label: "After a delay",
+        value: "after-delay",
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "Send immediately after previous journey",
+      value: "immediately",
+    },
+    {
+      label: "After a delay",
+      value: "after-delay",
+    },
+  ];
+};
 const actionOptions = [
   {
     label: "Immediately after entry",
@@ -103,42 +134,51 @@ const waitUnitOptions = [
   },
 ];
 
-function convertWaitToDays(value: number, unit: JourneyStepItem["waitUnit"]) {
-  switch (unit) {
-    case "hours":
-      return value / 24;
+const templateContent: Record<string, string> = {
+  "welcome-to-kiibank": `
+    <div class="font-semibold">Welcome to KiiBank</div>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Your KiiBank multi-currency account is ready.
+      Discover simple and secure ways to manage and move your money.
+    </p>
+  `,
 
-    case "weeks":
-      return value * 7;
+  "kiibank-account-features": `
+    <div class="font-semibold">
+      What You Can Do With Your KiiBank Account
+    </div>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Explore the features available to help you manage your money
+      across currencies.
+    </p>
+  `,
 
-    case "months":
-      return value * 30;
+  "using-gbp-account": `
+    <strong class="font-semibold">Using Your GBP Account</strong>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Learn how to use your GBP account to receive and manage money.
+    </p>
+  `,
 
-    case "days":
-    default:
-      return value;
-  }
-}
+  "sending-money": `
+    <strong class="font-semibold">Sending Money With KiiBank</strong>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Send money securely to your saved recipients using KiiBank.
+    </p>
+  `,
 
-function formatJourneyDay(day: number) {
-  if (Number.isInteger(day)) {
-    return day;
-  }
-
-  return day.toFixed(1);
-}
-
-function getChannelLabel(channel: string) {
-  return (
-    channelOptions.find((option) => option.value === channel)?.label ??
-    "Not selected"
-  );
-}
+  "discover-more-features": `
+    <strong class="font-semibold">Discover More KiiBank Features</strong>
+    <p class="mt-2 text-sm text-muted-foreground">
+      Discover more ways to manage your money with KiiBank.
+    </p>
+  `,
+};
 
 function getTemplateLabel(template: string) {
   return (
     messageTemplateOptions.find((option) => option.value === template)?.label ??
-    "Selected template"
+    "Message Template"
   );
 }
 
@@ -146,128 +186,96 @@ function getFallbackOptions(selectedChannel: string) {
   return channelOptions.filter((option) => option.value !== selectedChannel);
 }
 
-type TemplatePreviewProps = {
-  template: string;
-  channel: string;
-  fallbackChannel: string;
-};
+function formatWait(value: number, unit: WaitUnit) {
+  const unitLabels: Record<WaitUnit, string> = {
+    hours: "hour",
+    days: "day",
+    weeks: "week",
+    months: "month",
+  };
 
-function TemplatePreview({
-  template,
-  channel,
-  fallbackChannel,
-}: TemplatePreviewProps) {
+  const label = unitLabels[unit];
+
+  return `${value} ${value === 1 ? label : `${label}s`}`;
+}
+
+function TemplatePreviewPopover({ template }: { template: string }) {
   if (!template) {
     return null;
   }
 
-  const templateLabel = getTemplateLabel(template);
-  const selectedChannelLabel = getChannelLabel(channel);
-  const fallbackChannelLabel = getChannelLabel(fallbackChannel);
-
   return (
-    <div className="rounded-lg border bg-muted/20">
-      <div className="border-b px-4 py-3">
-        <p className="text-sm font-medium">Message Preview</p>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          View
+        </button>
+      </PopoverTrigger>
 
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Preview how the selected template will appear on each channel.
-        </p>
-      </div>
-
-      <Tabs defaultValue="selected-channel" className="w-full">
-        <div className="border-b px-4 pt-3">
-          <TabsList className="h-9">
-            <TabsTrigger value="selected-channel">
-              {selectedChannelLabel}
-            </TabsTrigger>
-
-            <TabsTrigger value="fallback-channel">
-              {fallbackChannelLabel === "Not selected"
-                ? "Fallback Channel"
-                : fallbackChannelLabel}
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="selected-channel" className="m-0 p-4">
-          <div className="rounded-lg border bg-background">
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <div>
-                <p className="text-sm font-medium">{templateLabel}</p>
-
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {selectedChannelLabel}
-                </p>
-              </div>
-
-              <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                {selectedChannelLabel}
-              </span>
-            </div>
-
-            <div className="space-y-3 p-4">
-              <div className="space-y-2">
-                <div className="h-3 w-2/3 rounded bg-muted" />
-                <div className="h-3 w-full rounded bg-muted" />
-                <div className="h-3 w-5/6 rounded bg-muted" />
-              </div>
-
-              <div className="rounded-md bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground">{templateLabel}</p>
-              </div>
-            </div>
+      <PopoverContent
+        align="end"
+        side="bottom"
+        className="w-[420px] max-w-[calc(100vw-2rem)]"
+      >
+        <div className="space-y-3">
+          <div className="border-b pb-3">
+            <p className="font-semibold">Template preview</p>
           </div>
-        </TabsContent>
 
-        <TabsContent value="fallback-channel" className="m-0 p-4">
-          {!fallbackChannel ? (
-            <div className="flex min-h-32 items-center justify-center rounded-lg border border-dashed bg-background px-4 text-center">
-              <div>
-                <p className="text-sm font-medium">
-                  No fallback channel selected
-                </p>
-
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Select a fallback channel to preview the message.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-lg border bg-background">
-              <div className="flex items-center justify-between border-b px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium">{templateLabel}</p>
-
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {fallbackChannelLabel}
-                  </p>
-                </div>
-
-                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
-                  {fallbackChannelLabel}
-                </span>
-              </div>
-
-              <div className="space-y-3 p-4">
-                <div className="space-y-2">
-                  <div className="h-3 w-2/3 rounded bg-muted" />
-                  <div className="h-3 w-full rounded bg-muted" />
-                  <div className="h-3 w-5/6 rounded bg-muted" />
-                </div>
-
-                <div className="rounded-md bg-muted/50 p-3">
-                  <p className="text-xs text-muted-foreground">
-                    {templateLabel}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </div>
+          <div
+            className="prose prose-sm max-w-none dark:prose-invert"
+            dangerouslySetInnerHTML={{
+              __html: templateContent[template] ?? "",
+            }}
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
   );
+}
+
+function formatJourneyTiming(steps: JourneyStepItem[]) {
+  const activeSteps = steps.filter(
+    (step) => step.action === "after-delay" && step.waitValue > 0,
+  );
+
+  if (activeSteps.length === 0) {
+    return "Immediately after signup";
+  }
+
+  const totals: Record<WaitUnit, number> = {
+    months: 0,
+    weeks: 0,
+    days: 0,
+    hours: 0,
+  };
+
+  activeSteps.forEach((step) => {
+    totals[step.waitUnit] += step.waitValue;
+  });
+
+  const parts: string[] = [];
+
+  if (totals.months > 0) {
+    parts.push(`${totals.months} ${totals.months === 1 ? "month" : "months"}`);
+  }
+
+  if (totals.weeks > 0) {
+    parts.push(`${totals.weeks} ${totals.weeks === 1 ? "week" : "weeks"}`);
+  }
+
+  if (totals.days > 0) {
+    parts.push(`${totals.days} ${totals.days === 1 ? "day" : "days"}`);
+  }
+
+  if (totals.hours > 0) {
+    parts.push(`${totals.hours} ${totals.hours === 1 ? "hour" : "hours"}`);
+  }
+
+  return `${parts.join(", ")} after signup`;
 }
 
 export function JourneyStep() {
@@ -276,13 +284,23 @@ export function JourneyStep() {
   >([]);
 
   const [mode, setMode] = useState<"always" | "conditional">("always");
+  const initialActionOptions = [
+    { label: "Send immediately after entry", value: "immediately" },
+    { label: "After a delay", value: "after-delay" },
+  ];
 
-  const [action, setAction] = useState("immediately");
+  const subsequentActionOptions = [
+    {
+      label: "Send immediately after previous journey",
+      value: "immediately",
+    },
+    { label: "After a delay", value: "after-delay" },
+  ];
+  const [initialAction, setInitialAction] = useState("immediately");
 
   const [initialWaitValue, setInitialWaitValue] = useState(1);
 
-  const [initialWaitUnit, setInitialWaitUnit] =
-    useState<JourneyStepItem["waitUnit"]>("days");
+  const [initialWaitUnit, setInitialWaitUnit] = useState<WaitUnit>("days");
 
   const [initialTemplate, setInitialTemplate] = useState("");
 
@@ -292,27 +310,17 @@ export function JourneyStep() {
 
   const [journeySteps, setJourneySteps] = useState<JourneyStepItem[]>([]);
 
-  const isInitialDelayed = action === "after-delay";
+  const isInitialDelayed = initialAction === "after-delay";
 
-  const initialJourneyDay = isInitialDelayed
-    ? convertWaitToDays(initialWaitValue, initialWaitUnit)
-    : 0;
+  const initialJourneyTiming = isInitialDelayed
+    ? `${formatWait(initialWaitValue, initialWaitUnit)} after signup`
+    : "Immediately after signup";
 
-  /**
-   * Fallback options for Journey Step 1.
-   *
-   * The currently selected channel can never be used
-   * as its own fallback channel.
-   */
   const initialFallbackOptions = useMemo(
     () => getFallbackOptions(initialChannel),
     [initialChannel],
   );
 
-  /**
-   * When the primary channel changes, make sure the
-   * fallback channel is still valid.
-   */
   const handleInitialChannelChange = (value: string) => {
     setInitialChannel(value);
 
@@ -321,22 +329,12 @@ export function JourneyStep() {
     }
   };
 
-  /**
-   * Add a new journey step.
-   *
-   * New journeys intentionally start with:
-   * - Empty template
-   * - Empty channel
-   * - Empty fallback channel
-   * - Always send
-   *
-   * Nothing is preselected.
-   */
   const addJourneyStep = () => {
     setJourneySteps((steps) => [
       ...steps,
       {
         id: Date.now(),
+        action: "immediately",
         waitValue: 1,
         waitUnit: "days",
         template: "",
@@ -361,12 +359,6 @@ export function JourneyStep() {
     );
   };
 
-  /**
-   * Change a journey's channel.
-   *
-   * If the newly selected channel is the same as the
-   * fallback channel, clear the fallback channel.
-   */
   const handleJourneyChannelChange = (step: JourneyStepItem, value: string) => {
     updateJourneyStep(step.id, {
       channel: value,
@@ -378,23 +370,29 @@ export function JourneyStep() {
     setJourneySteps((steps) => steps.filter((step) => step.id !== id));
   };
 
-  const journeyTiming = useMemo(() => {
-    let accumulatedDays = isInitialDelayed
-      ? convertWaitToDays(initialWaitValue, initialWaitUnit)
-      : 0;
+  const getJourneyTiming = (index: number) => {
+    const currentStep = journeySteps[index];
 
-    return journeySteps.map((step) => {
-      accumulatedDays += convertWaitToDays(step.waitValue, step.waitUnit);
+    if (currentStep.action === "immediately") {
+      return "Immediately after previous journey";
+    }
 
-      return {
-        id: step.id,
-        day: accumulatedDays,
-      };
-    });
-  }, [journeySteps, isInitialDelayed, initialWaitValue, initialWaitUnit]);
+    const previousSteps = journeySteps.slice(0, index + 1);
 
-  const getJourneyDay = (id: number) => {
-    return journeyTiming.find((item) => item.id === id)?.day;
+    const stepsForTiming = [
+      ...(isInitialDelayed
+        ? [
+            {
+              action: "after-delay",
+              waitValue: initialWaitValue,
+              waitUnit: initialWaitUnit,
+            } as JourneyStepItem,
+          ]
+        : []),
+      ...previousSteps,
+    ];
+
+    return formatJourneyTiming(stepsForTiming);
   };
 
   return (
@@ -406,11 +404,12 @@ export function JourneyStep() {
         </div>
 
         <div className="space-y-5 p-5">
+          {/* Action */}
           <div className="grid gap-5 md:grid-cols-2">
             <AppSelect
               label="Action Type"
-              value={action}
-              onValueChange={setAction}
+              value={initialAction}
+              onValueChange={setInitialAction}
               placeholder="Select"
               options={actionOptions}
             />
@@ -440,7 +439,7 @@ export function JourneyStep() {
                   <AppSelect
                     value={initialWaitUnit}
                     onValueChange={(value) =>
-                      setInitialWaitUnit(value as JourneyStepItem["waitUnit"])
+                      setInitialWaitUnit(value as WaitUnit)
                     }
                     options={waitUnitOptions}
                   />
@@ -449,25 +448,33 @@ export function JourneyStep() {
             )}
           </div>
 
-          {isInitialDelayed && (
-            <div className="rounded-lg border bg-muted/30 px-4 py-3">
-              <p className="text-xs text-muted-foreground">Journey timing</p>
+          {/* Journey Timing */}
+          <div className="rounded-lg border bg-muted/30 px-4 py-3">
+            <p className="text-xs text-muted-foreground">Journey timing</p>
 
-              <p className="mt-1 text-sm font-medium">
-                Day {formatJourneyDay(initialJourneyDay)} after signup
-              </p>
-            </div>
-          )}
+            <p className="mt-1 text-sm font-medium">{initialJourneyTiming}</p>
+          </div>
 
+          {/* Message / Channel / Fallback */}
           <div className="grid gap-5 md:grid-cols-3">
-            <AppSelect
-              label="Message Template"
-              value={initialTemplate}
-              onValueChange={setInitialTemplate}
-              placeholder="Select Template"
-              options={messageTemplateOptions}
-              required
-            />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>
+                  Message Template <span className="text-destructive">*</span>
+                </Label>
+
+                {initialTemplate && (
+                  <TemplatePreviewPopover template={initialTemplate} />
+                )}
+              </div>
+
+              <AppSelect
+                value={initialTemplate}
+                onValueChange={setInitialTemplate}
+                placeholder="Select Template"
+                options={messageTemplateOptions}
+              />
+            </div>
 
             <AppSelect
               label="Channel"
@@ -487,14 +494,6 @@ export function JourneyStep() {
             />
           </div>
 
-          {initialTemplate && (
-            <TemplatePreview
-              template={initialTemplate}
-              channel={initialChannel}
-              fallbackChannel={initialFallback}
-            />
-          )}
-
           <JourneyMessageCondition
             mode={mode}
             onModeChange={setMode}
@@ -506,8 +505,6 @@ export function JourneyStep() {
 
       {/* Subsequent Journey Steps */}
       {journeySteps.map((step, index) => {
-        const journeyDay = getJourneyDay(step.id);
-
         const fallbackOptions = getFallbackOptions(step.channel);
 
         return (
@@ -533,41 +530,59 @@ export function JourneyStep() {
             </div>
 
             <div className="space-y-5 p-5">
-              <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
-                <div className="space-y-2">
-                  <Label>
-                    Wait Value <span className="text-destructive">*</span>
-                  </Label>
+              {/* Action */}
+              <div className="grid gap-5 md:grid-cols-2">
+                <AppSelect
+                  label="Action"
+                  value={step.action}
+                  onValueChange={(value) =>
+                    updateJourneyStep(step.id, {
+                      action: value,
+                    })
+                  }
+                  options={
+                    index === 1 ? initialActionOptions : subsequentActionOptions
+                  }
+                />
+                {step.action === "after-delay" && (
+                  <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+                    <div className="space-y-2">
+                      <Label>
+                        Wait Value <span className="text-destructive">*</span>
+                      </Label>
 
-                  <Input
-                    type="number"
-                    min={1}
-                    value={step.waitValue}
-                    onChange={(event) =>
-                      updateJourneyStep(step.id, {
-                        waitValue: Number(event.target.value) || 0,
-                      })
-                    }
-                  />
-                </div>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={step.waitValue}
+                        onChange={(event) =>
+                          updateJourneyStep(step.id, {
+                            waitValue: Number(event.target.value) || 0,
+                          })
+                        }
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label>
-                    Wait Unit <span className="text-destructive">*</span>
-                  </Label>
+                    <div className="space-y-2">
+                      <Label>
+                        Wait Unit <span className="text-destructive">*</span>
+                      </Label>
 
-                  <AppSelect
-                    value={step.waitUnit}
-                    onValueChange={(value) =>
-                      updateJourneyStep(step.id, {
-                        waitUnit: value as JourneyStepItem["waitUnit"],
-                      })
-                    }
-                    options={waitUnitOptions}
-                  />
-                </div>
+                      <AppSelect
+                        value={step.waitUnit}
+                        onValueChange={(value) =>
+                          updateJourneyStep(step.id, {
+                            waitUnit: value as WaitUnit,
+                          })
+                        }
+                        options={waitUnitOptions}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
+              {/* Journey Timing */}
               <div className="rounded-lg border bg-muted/30 px-4 py-3">
                 <div className="flex items-start gap-2">
                   <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
@@ -578,27 +593,37 @@ export function JourneyStep() {
                     </p>
 
                     <p className="mt-1 text-sm font-medium">
-                      {journeyDay !== undefined
-                        ? `Day ${formatJourneyDay(journeyDay)} after signup`
-                        : "Calculated automatically"}
+                      {getJourneyTiming(index)}
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* Message / Channel / Fallback */}
               <div className="grid gap-5 md:grid-cols-3">
-                <AppSelect
-                  label="Message Template"
-                  value={step.template}
-                  onValueChange={(value) =>
-                    updateJourneyStep(step.id, {
-                      template: value,
-                    })
-                  }
-                  placeholder="Select message template"
-                  options={messageTemplateOptions}
-                  required
-                />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>
+                      Message Template{" "}
+                      <span className="text-destructive">*</span>
+                    </Label>
+
+                    {step.template && (
+                      <TemplatePreviewPopover template={step.template} />
+                    )}
+                  </div>
+
+                  <AppSelect
+                    value={step.template}
+                    onValueChange={(value) =>
+                      updateJourneyStep(step.id, {
+                        template: value,
+                      })
+                    }
+                    placeholder="Select message template"
+                    options={messageTemplateOptions}
+                  />
+                </div>
 
                 <AppSelect
                   label="Channel"
@@ -623,14 +648,6 @@ export function JourneyStep() {
                   options={fallbackOptions}
                 />
               </div>
-
-              {step.template && (
-                <TemplatePreview
-                  template={step.template}
-                  channel={step.channel}
-                  fallbackChannel={step.fallback}
-                />
-              )}
 
               <JourneyMessageCondition
                 mode={step.conditionMode}

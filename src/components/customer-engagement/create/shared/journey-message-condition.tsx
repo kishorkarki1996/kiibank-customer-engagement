@@ -156,15 +156,15 @@ export function JourneyMessageCondition({
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Step Condition</Label>
+      <div className="space-y-2">
+        <Label>Send this message only if...</Label>
 
         <RadioGroup
           value={mode}
           onValueChange={(value) =>
             handleModeChange(value as "always" | "conditional")
           }
-          className="flex items-center gap-6"
+          className="flex items-center gap-6 mt-2"
         >
           <div className="flex items-center gap-2">
             <RadioGroupItem value="always" id="always-send" />
@@ -188,7 +188,7 @@ export function JourneyMessageCondition({
       </div>
 
       {mode === "conditional" && (
-        <div className="space-y-4">
+        <div>
           {conditionBlocks.map((block, blockIndex) => (
             <div key={block.id}>
               {/* AND separator */}
