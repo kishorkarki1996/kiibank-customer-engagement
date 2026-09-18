@@ -1,8 +1,3 @@
-"use client";
-
-import { useState } from "react";
-import { ShieldCheck } from "lucide-react";
-
 const summaryItems = [
   {
     label: "Name",
@@ -81,7 +76,7 @@ export function ReviewActivateStep() {
 
         {/* Final checks */}
 
-        <section className="rounded-xl border bg-muted/20 p-5">
+        {/* <section className="rounded-xl border bg-muted/20 p-5">
           <div className="flex items-start gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <ShieldCheck className="size-4" />
@@ -97,7 +92,7 @@ export function ReviewActivateStep() {
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
       </div>
     </>
   );

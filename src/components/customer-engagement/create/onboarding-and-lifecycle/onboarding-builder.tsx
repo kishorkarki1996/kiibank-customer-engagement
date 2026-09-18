@@ -31,6 +31,7 @@ import { PreviewStep } from "./steps/preview-step";
 import { TestStep } from "./steps/test-step";
 import { ReviewActivateStep } from "./steps/review-activate-step";
 import JourneyExitStep from "./steps/journey-exit";
+import { useRouter } from "next/navigation";
 
 const steps = [
   {
@@ -59,7 +60,7 @@ const steps = [
   },
   {
     id: "preview-journey",
-    label: "Preview Journey",
+    label: "Preview & Test",
   },
   {
     id: "test",
@@ -72,6 +73,7 @@ const steps = [
 ];
 
 export function OnboardingBuilder() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -95,7 +97,7 @@ export function OnboardingBuilder() {
    * false:
    * Save as Draft + Submit for Approval
    */
-  const canActivateDirectly = true;
+  const canActivateDirectly = false;
 
   const next = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
@@ -266,10 +268,6 @@ export function OnboardingBuilder() {
       <AlertDialog open={approvalOpen} onOpenChange={setApprovalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Send className="size-5" />
-            </div>
-
             <AlertDialogTitle>Submit engagement for approval?</AlertDialogTitle>
 
             <AlertDialogDescription>
@@ -277,21 +275,6 @@ export function OnboardingBuilder() {
               It will not become active until it has been approved.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-
-              <div>
-                <p className="text-sm font-medium">Ready for approval</p>
-
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  The current engagement configuration will be submitted for
-                  review.
-                </p>
-              </div>
-            </div>
-          </div>
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSubmitting}>
@@ -341,20 +324,9 @@ export function OnboardingBuilder() {
               className="mt-6"
               onClick={() => {
                 setActivationSuccessOpen(false);
-
-                /**
-                 * TODO:
-                 *
-                 * router.push(
-                 *   "/customer-engagement/engagements"
-                 * );
-                 *
-                 * Or preferably:
-                 *
-                 * router.push(
-                 *   "/customer-engagement/engagements/[id]"
-                 * );
-                 */
+                router.push(
+                  "/customer-engagement/engagements/onboarding-lifecycle",
+                );
               }}
             >
               View Engagement
@@ -389,17 +361,9 @@ export function OnboardingBuilder() {
               className="mt-6"
               onClick={() => {
                 setApprovalSuccessOpen(false);
-
-                /**
-                 * TODO:
-                 *
-                 * router.push(
-                 *   "/customer-engagement/engagements"
-                 * );
-                 *
-                 * Or open the engagement detail page
-                 * showing Pending Approval status.
-                 */
+                router.push(
+                  "/customer-engagement/engagements/onboarding-lifecycle",
+                );
               }}
             >
               View Engagement

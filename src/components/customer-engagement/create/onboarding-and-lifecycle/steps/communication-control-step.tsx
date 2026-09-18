@@ -1,229 +1,229 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ArrowRight,
-  Check,
-  Info,
-  LockKeyhole,
-  Repeat2,
-  ShieldCheck,
-} from "lucide-react";
+import { Info, InfoIcon, LockKeyhole, ShieldCheck } from "lucide-react";
 
 import { AppSelect } from "@/components/common/app-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import {
-  frequencyControlOptions,
-  frequencyPeriodOptions,
-  reEntryOptions,
+  communicationPreferenceOptions,
+  duplicateProtectionOptions,
+  entryFrequencyOptions,
   reEntryUnitOptions,
 } from "../data/communication-control-data";
-import { Switch } from "@/components/ui/switch";
 
 export function CommunicationControlsStep() {
-  const [frequencyControl, setFrequencyControl] = useState("global");
+  const [entryFrequency, setEntryFrequency] = useState("");
 
-  const [frequencyCount, setFrequencyCount] = useState("1");
+  const [entryFrequencyValue, setEntryFrequencyValue] = useState("");
 
-  const [frequencyPeriod, setFrequencyPeriod] = useState("day");
+  const [communicationPreference, setCommunicationPreference] = useState(
+    "respect-preferences",
+  );
 
-  const [reEntry, setReEntry] = useState<"no" | "yes">("no");
+  const [duplicateProtection, setDuplicateProtection] = useState("once");
 
-  const [reEntryValue, setReEntryValue] = useState("30");
+  const [reEntryValue, setReEntryValue] = useState("");
 
   const [reEntryUnit, setReEntryUnit] = useState("days");
 
+  /**
+   * UI permission simulation for now.
+   *
+   * true:
+   * User can override customer communication preferences.
+   *
+   * false:
+   * User can only use the default option.
+   */
+  const canOverrideCustomerPreference = true;
+
+  const showEntryFrequencyValue = entryFrequency !== "once-only";
+
+  const allowReEntry = duplicateProtection === "allow-re-entry";
+
+  const handleEntryFrequencyChange = (value: string) => {
+    setEntryFrequency(value);
+
+    if (value === "once-only") {
+      setEntryFrequencyValue("");
+    }
+  };
+
+  const handleDuplicateProtectionChange = (value: string) => {
+    setDuplicateProtection(value);
+
+    if (value !== "allow-re-entry") {
+      setReEntryValue("");
+      setReEntryUnit("days");
+    }
+  };
+
   return (
     <div className="space-y-8">
-      {/* Frequency control */}
+      {/* Entry Frequency Control */}
 
       <section className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold">Frequency Control</h3>
+          <h3 className="text-sm font-semibold">Entry Frequency Control</h3>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Define how communication frequency should be controlled for this
+            Define how frequently the same customer can qualify to enter this
             engagement.
           </p>
         </div>
 
-        <AppSelect
-          label="Frequency rule"
-          value={frequencyControl}
-          onValueChange={setFrequencyControl}
-          options={frequencyControlOptions}
-        />
+        <div className="grid gap-5 md:grid-cols-2">
+          <AppSelect
+            label="Entry Frequency"
+            value={entryFrequency}
+            onValueChange={handleEntryFrequencyChange}
+            options={entryFrequencyOptions}
+            required
+          />
 
-        {frequencyControl === "engagement-specific" && (
-          <div className="rounded-xl border bg-muted/20 p-4">
-            <Label>Maximum messages</Label>
+          {showEntryFrequencyValue && (
+            <div className="space-y-2">
+              <Label htmlFor="entry-frequency-value">
+                Frequency Value
+                <span className="ml-1 text-destructive">*</span>
+              </Label>
 
-            <div className="mt-2 grid gap-3 sm:grid-cols-[1fr_180px]">
               <Input
+                id="entry-frequency-value"
                 type="number"
                 min={1}
-                value={frequencyCount}
-                onChange={(event) => setFrequencyCount(event.target.value)}
-                placeholder="Enter count"
-              />
-
-              <AppSelect
-                value={frequencyPeriod}
-                onValueChange={setFrequencyPeriod}
-                options={frequencyPeriodOptions}
+                step={1}
+                value={entryFrequencyValue}
+                onChange={(event) => setEntryFrequencyValue(event.target.value)}
+                placeholder={getEntryFrequencyPlaceholder(entryFrequency)}
+                required
               />
             </div>
+          )}
+        </div>
 
-            <p className="mt-2 text-xs text-muted-foreground">
-              Engagement-specific rules should only be available to authorised
-              administrators.
+        {showEntryFrequencyValue && (
+          <div className="flex items-start gap-2 rounded-lg border bg-muted/30 px-4 py-3">
+            <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+
+            <p className="text-xs leading-5 text-muted-foreground">
+              A customer may enter this engagement again only after the
+              configured entry frequency period has passed.
             </p>
           </div>
         )}
       </section>
 
-      {/* Communication preferences */}
+      {/* Customer Communication Preferences */}
 
       <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold">
-            Customer Communication Preferences
-          </h3>
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+          <AppSelect
+            label="Communication Preference"
+            value={communicationPreference}
+            onValueChange={setCommunicationPreference}
+            options={communicationPreferenceOptions}
+            disabled={!canOverrideCustomerPreference}
+            required
+          />
 
-          <p className="mt-1 text-sm text-muted-foreground">
-            Mandatory communication controls applied by KiiBank.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 rounded-xl border bg-muted/30 p-4">
-          <p className="text-sm font-medium">
-            Respect customer channel eligibility and communication preferences
-          </p>
-          <Switch defaultChecked className="size-4" />
-        </div>
-      </section>
-
-      {/* Channel fallback */}
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold">Channel Fallback</h3>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            Fallback channels are attempted only when permitted for the
-            customer.
-          </p>
-        </div>
-
-        <div className="rounded-xl border bg-muted/20 p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <ChannelBadge label="Push" />
-
-            <ArrowRight className="size-4 text-muted-foreground" />
-
-            <ChannelBadge label="WhatsApp" />
-
-            <ArrowRight className="size-4 text-muted-foreground" />
-
-            <ChannelBadge label="Email" />
-          </div>
-
-          <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
-            <Info className="mt-0.5 size-3.5 shrink-0" />
-
-            <p>
-              Each journey step can define its own fallback channel. The system
-              will only attempt a fallback when the channel is permitted.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Duplicate protection */}
-
-      <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold">Duplicate Protection</h3>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            Control whether the same customer can enter this journey more than
-            once.
-          </p>
-        </div>
-
-        <div className="rounded-xl border p-4">
-          <RadioGroup
-            value={reEntry}
-            onValueChange={(value) => setReEntry(value as "no" | "yes")}
-            className="space-y-3"
-          >
-            <div className="flex items-start gap-3">
-              <RadioGroupItem value="no" id="no-re-entry" className="mt-1" />
-
-              <Label htmlFor="no-re-entry" className="cursor-pointer">
-                <span className="block font-medium">
-                  A customer can enter this journey only once
-                </span>
-
-                <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                  Recommended for the New Customer Welcome Journey.
-                </span>
-              </Label>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <RadioGroupItem
-                value="yes"
-                id="allow-re-entry"
-                className="mt-1"
-              />
-
-              <Label htmlFor="allow-re-entry" className="cursor-pointer">
-                <span className="block font-medium">Allow re-entry</span>
-
-                <span className="mt-1 block text-xs font-normal text-muted-foreground">
-                  Customer may enter this journey again after the configured
-                  waiting period.
-                </span>
-              </Label>
-            </div>
-          </RadioGroup>
-
-          {reEntry === "yes" && (
-            <div className="mt-5 border-t pt-5">
-              <div className="max-w-xl space-y-2">
-                <Label>Customer may re-enter after</Label>
-
-                <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
-                  <Input
-                    type="number"
-                    min={1}
-                    value={reEntryValue}
-                    onChange={(event) => setReEntryValue(event.target.value)}
-                    placeholder="Enter value"
-                  />
-
-                  <AppSelect
-                    value={reEntryUnit}
-                    onValueChange={setReEntryUnit}
-                    options={reEntryUnitOptions}
-                  />
-                </div>
-              </div>
+          {!canOverrideCustomerPreference && (
+            <div className="flex h-9 items-center gap-2 rounded-md border bg-muted/30 px-3 text-xs text-muted-foreground">
+              <LockKeyhole className="size-3.5" />
+              Restricted
             </div>
           )}
         </div>
 
+        {!canOverrideCustomerPreference ? (
+          <div className="flex items-start gap-3 rounded-xl border bg-muted/30 p-4">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ShieldCheck className="size-4" />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">
+                Customer preferences will be respected
+              </p>
+
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Only authorised users can override customer communication
+                preferences.
+              </p>
+            </div>
+          </div>
+        ) : (
+          communicationPreference === "override-preferences" && (
+            <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4">
+              <Info className="mt-0.5 size-4 shrink-0 text-destructive" />
+
+              <div>
+                <p className="text-sm font-medium">
+                  Customer preferences will be overridden
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Notifications may be sent even when the customer's
+                  communication preference would normally prevent delivery.
+                </p>
+              </div>
+            </div>
+          )
+        )}
+      </section>
+
+      {/* Duplicate Protection */}
+
+      <section className="space-y-4">
+        <AppSelect
+          label="Duplicate Protection"
+          value={duplicateProtection}
+          onValueChange={handleDuplicateProtectionChange}
+          options={duplicateProtectionOptions}
+          required
+        />
+
+        {allowReEntry && (
+          <div className="rounded-xl border bg-muted/20 p-4">
+            <div className="grid gap-5 md:grid-cols-[1fr_180px]">
+              <div className="space-y-2">
+                <Label htmlFor="re-entry-value">
+                  Customer may re-enter after
+                  <span className="ml-1 text-destructive">*</span>
+                </Label>
+
+                <Input
+                  id="re-entry-value"
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={reEntryValue}
+                  onChange={(event) => setReEntryValue(event.target.value)}
+                  placeholder="Enter value"
+                  required
+                />
+              </div>
+
+              <AppSelect
+                label="Unit"
+                value={reEntryUnit}
+                onValueChange={setReEntryUnit}
+                options={reEntryUnitOptions}
+                required
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
-          <Repeat2 className="mt-0.5 size-4 shrink-0 text-primary" />
+          <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
 
           <p className="text-xs leading-5 text-muted-foreground">
             For the New Customer Welcome Journey, re-entry should remain
-            disabled so customers do not receive the onboarding sequence more
-            than once.
+            disabled. A customer should enter the onboarding journey only once.
           </p>
         </div>
       </section>
@@ -231,10 +231,18 @@ export function CommunicationControlsStep() {
   );
 }
 
-function ChannelBadge({ label }: { label: string }) {
-  return (
-    <div className="rounded-md border bg-background px-3 py-1.5 text-sm font-medium">
-      {label}
-    </div>
-  );
+function getEntryFrequencyPlaceholder(value: string) {
+  switch (value) {
+    case "every-days":
+      return "Number of days";
+
+    case "every-weeks":
+      return "Number of weeks";
+
+    case "every-months":
+      return "Number of months";
+
+    default:
+      return "Enter value";
+  }
 }

@@ -255,7 +255,7 @@ function InAppPreview({ htmlContent }: { htmlContent: string }) {
             dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
 
-          <Button type="button" variant="outline" size="xs" className="mt-4">
+          <Button type="button" size="sm" className="mt-4">
             View Account
           </Button>
         </div>
