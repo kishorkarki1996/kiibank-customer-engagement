@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { OnboardingLifeCycleTable } from "./onboarding-lifecycle-table";
+import { OnboardingLifecycleTable } from "./onboarding-lifecycle-table";
 
 export default function OnboardingLifecyclePage() {
   return (
@@ -23,7 +23,7 @@ export default function OnboardingLifecyclePage() {
       </div>
 
       <div className="min-w-0">
-        <OnboardingLifeCycleTable />
+        <OnboardingLifecycleTable />
       </div>
     </div>
   );
