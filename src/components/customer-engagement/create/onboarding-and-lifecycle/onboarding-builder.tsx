@@ -60,7 +60,7 @@ const steps = [
   },
   {
     id: "preview-journey",
-    label: "Preview & Test",
+    label: "Preview",
   },
   {
     id: "test",

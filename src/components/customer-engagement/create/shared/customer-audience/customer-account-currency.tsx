@@ -17,7 +17,7 @@ export default function CustomerAccountCurrency({
 
   return (
     <AppMultiSelect
-      label="Customer Primary Currency"
+      label="Customer Account Currency"
       items={primaryCurrencies}
       value={value}
       setValue={setValue}

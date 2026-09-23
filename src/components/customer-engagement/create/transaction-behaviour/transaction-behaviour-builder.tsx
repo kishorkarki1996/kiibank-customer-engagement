@@ -23,6 +23,7 @@ import { StepActions } from "../step-actions";
 import { StepHeader } from "../step-header";
 import { BasicInformationStep } from "./steps/basic-information-step";
 import { CustomerAudienceStep } from "./steps/customer-audience-step";
+import { BehaviourRulesStep } from "./steps/transaction-behaviour-rules-step";
 
 // import { AudienceStep } from "./steps/audience";
 // import { EntryTriggerStep } from "./steps/entry-trigger";
@@ -185,9 +186,9 @@ export function TransactionBehaviourBuilder() {
 
             {currentStep === 1 && <CustomerAudienceStep />}
 
-            {/* {currentStep === 2 && <EntryTriggerStep />}
+            {currentStep === 2 && <BehaviourRulesStep />}
 
-            {currentStep === 3 && <JourneyStep />}
+            {/*{currentStep === 3 && <JourneyStep />}
 
             {currentStep === 4 && <CommunicationControlsStep />}
 
