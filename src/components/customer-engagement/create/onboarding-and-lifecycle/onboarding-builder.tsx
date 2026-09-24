@@ -97,7 +97,7 @@ export function OnboardingBuilder() {
    * false:
    * Save as Draft + Submit for Approval
    */
-  const canActivateDirectly = false;
+  const canActivateDirectly = true;
 
   const next = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));

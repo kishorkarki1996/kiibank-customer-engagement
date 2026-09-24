@@ -83,7 +83,7 @@ export function StepActions({
           </Button>
         )}
 
-        {isLastStep && canActivateDirectly && (
+        {isLastStep && (
           <Button
             type="button"
             onClick={onActivate}
@@ -95,7 +95,8 @@ export function StepActions({
           </Button>
         )}
 
-        {isLastStep && !canActivateDirectly && (
+        {/* {isLastStep && !canActivateDirectly && ( */}
+        {isLastStep && (
           <Button
             type="button"
             onClick={onSubmitForApproval}

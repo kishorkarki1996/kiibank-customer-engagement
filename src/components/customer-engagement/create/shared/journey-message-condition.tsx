@@ -155,9 +155,9 @@ export function JourneyMessageCondition({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-2">
-        <Label>Send this message only if...</Label>
+        <Label>Step Condition</Label>
 
         <RadioGroup
           value={mode}
@@ -188,204 +188,210 @@ export function JourneyMessageCondition({
       </div>
 
       {mode === "conditional" && (
-        <div>
-          {conditionBlocks.map((block, blockIndex) => (
-            <div key={block.id}>
-              {/* AND separator */}
-              {blockIndex > 0 && (
-                <div className="flex items-center gap-3 py-4">
-                  <div className="flex-1 border-t border-dashed border-border" />
+        <div className="space-y-2">
+          <p className="text-muted-foreground text-sm mt-2">
+            Send this message only if...
+          </p>
+          <div>
+            {conditionBlocks.map((block, blockIndex) => (
+              <div key={block.id}>
+                {/* AND separator */}
+                {blockIndex > 0 && (
+                  <div className="flex items-center gap-3 py-4">
+                    <div className="flex-1 border-t border-dashed border-border" />
 
-                  <span className="rounded-full bg-background px-3 py-1 text-xs font-medium text-primary shadow-sm ring-1 ring-border">
-                    AND
-                  </span>
+                    <span className="rounded-full bg-background px-3 py-1 text-xs font-medium text-primary shadow-sm ring-1 ring-border">
+                      AND
+                    </span>
 
-                  <div className="flex-1 border-t border-dashed border-border" />
-                </div>
-              )}
+                    <div className="flex-1 border-t border-dashed border-border" />
+                  </div>
+                )}
 
-              {/* OR block */}
-              <div className="rounded-lg bg-muted/50 p-3">
-                <div className="rounded-lg bg-background p-3 shadow-sm">
-                  <div>
-                    {block.conditions.map((condition, conditionIndex) => {
-                      const selectedCondition = journeyConditionData.find(
-                        (item) => item.value === condition.field,
-                      );
+                {/* OR block */}
+                <div className="rounded-lg bg-muted/50 p-3">
+                  <div className="rounded-lg bg-background p-3 shadow-sm">
+                    <div>
+                      {block.conditions.map((condition, conditionIndex) => {
+                        const selectedCondition = journeyConditionData.find(
+                          (item) => item.value === condition.field,
+                        );
 
-                      return (
-                        <div key={condition.id}>
-                          {/* OR separator */}
-                          {conditionIndex > 0 && (
-                            <div className="flex items-center gap-3 py-4">
-                              <div className="flex-1 border-t border-dashed border-border" />
+                        return (
+                          <div key={condition.id}>
+                            {/* OR separator */}
+                            {conditionIndex > 0 && (
+                              <div className="flex items-center gap-3 py-4">
+                                <div className="flex-1 border-t border-dashed border-border" />
 
-                              <span className="rounded-full bg-background px-3 py-1 text-xs font-medium text-primary shadow-sm ring-1 ring-border">
-                                OR
-                              </span>
+                                <span className="rounded-full bg-background px-3 py-1 text-xs font-medium text-primary shadow-sm ring-1 ring-border">
+                                  OR
+                                </span>
 
-                              <div className="flex-1 border-t border-dashed border-border" />
-                            </div>
-                          )}
+                                <div className="flex-1 border-t border-dashed border-border" />
+                              </div>
+                            )}
 
-                          <div className="grid items-end gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_40px]">
-                            {/* Condition */}
-                            <AppSelect
-                              value={condition.field}
-                              onValueChange={(value) =>
-                                updateCondition(block.id, condition.id, {
-                                  field: value,
-                                  operator: "",
-                                  value: "",
-                                })
-                              }
-                              placeholder="Select condition"
-                              options={conditionFieldOptions}
-                              triggerClassName="min-w-0"
-                              triggerProps={{
-                                className: "min-w-0",
-                              }}
-                            />
-
-                            {/* Operator */}
-                            {selectedCondition?.operatorOptions?.length ? (
+                            <div className="grid items-end gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)_40px]">
+                              {/* Condition */}
                               <AppSelect
-                                value={condition.operator}
+                                value={condition.field}
                                 onValueChange={(value) =>
                                   updateCondition(block.id, condition.id, {
-                                    operator: value,
+                                    field: value,
+                                    operator: "",
+                                    value: "",
                                   })
                                 }
-                                placeholder="Select operator"
-                                options={selectedCondition.operatorOptions}
+                                placeholder="Select condition"
+                                options={conditionFieldOptions}
                                 triggerClassName="min-w-0"
                                 triggerProps={{
                                   className: "min-w-0",
                                 }}
                               />
-                            ) : (
-                              <div />
-                            )}
 
-                            {/* Value */}
-                            {selectedCondition?.valueField?.type === "input" ? (
-                              <Input
-                                type={selectedCondition.valueField.inputType}
-                                min={
-                                  selectedCondition.valueField.inputType ===
-                                  "number"
-                                    ? 0
-                                    : undefined
-                                }
-                                value={condition.value}
-                                onChange={(event) =>
-                                  updateCondition(block.id, condition.id, {
-                                    value: event.target.value,
-                                  })
-                                }
-                                placeholder={
-                                  selectedCondition.valueField.placeholder
-                                }
-                              />
-                            ) : selectedCondition?.valueField?.type ===
-                              "select" ? (
-                              <AppSelect
-                                value={condition.value}
-                                onValueChange={(value) =>
-                                  updateCondition(block.id, condition.id, {
-                                    value,
-                                  })
-                                }
-                                placeholder={
-                                  selectedCondition.valueField.placeholder
-                                }
-                                options={selectedCondition.valueField.options}
-                                triggerClassName="min-w-0"
-                                triggerProps={{
-                                  className: "min-w-0",
-                                }}
-                              />
-                            ) : (
-                              <div />
-                            )}
+                              {/* Operator */}
+                              {selectedCondition?.operatorOptions?.length ? (
+                                <AppSelect
+                                  value={condition.operator}
+                                  onValueChange={(value) =>
+                                    updateCondition(block.id, condition.id, {
+                                      operator: value,
+                                    })
+                                  }
+                                  placeholder="Select operator"
+                                  options={selectedCondition.operatorOptions}
+                                  triggerClassName="min-w-0"
+                                  triggerProps={{
+                                    className: "min-w-0",
+                                  }}
+                                />
+                              ) : (
+                                <div />
+                              )}
 
-                            {/* Delete condition */}
-                            <div className="flex justify-end">
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() =>
-                                  removeCondition(block.id, condition.id)
-                                }
-                                aria-label="Remove condition"
-                                className="shrink-0"
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
+                              {/* Value */}
+                              {selectedCondition?.valueField?.type ===
+                              "input" ? (
+                                <Input
+                                  type={selectedCondition.valueField.inputType}
+                                  min={
+                                    selectedCondition.valueField.inputType ===
+                                    "number"
+                                      ? 0
+                                      : undefined
+                                  }
+                                  value={condition.value}
+                                  onChange={(event) =>
+                                    updateCondition(block.id, condition.id, {
+                                      value: event.target.value,
+                                    })
+                                  }
+                                  placeholder={
+                                    selectedCondition.valueField.placeholder
+                                  }
+                                />
+                              ) : selectedCondition?.valueField?.type ===
+                                "select" ? (
+                                <AppSelect
+                                  value={condition.value}
+                                  onValueChange={(value) =>
+                                    updateCondition(block.id, condition.id, {
+                                      value,
+                                    })
+                                  }
+                                  placeholder={
+                                    selectedCondition.valueField.placeholder
+                                  }
+                                  options={selectedCondition.valueField.options}
+                                  triggerClassName="min-w-0"
+                                  triggerProps={{
+                                    className: "min-w-0",
+                                  }}
+                                />
+                              ) : (
+                                <div />
+                              )}
+
+                              {/* Delete condition */}
+                              <div className="flex justify-end">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    removeCondition(block.id, condition.id)
+                                  }
+                                  aria-label="Remove condition"
+                                  className="shrink-0"
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
 
-                    {/* Separator before actions */}
-                    <div className="mt-4 border-t border-border" />
+                      {/* Separator before actions */}
+                      <div className="mt-4 border-t border-border" />
 
-                    {/* Block actions */}
-                    <div className="mt-3 flex items-center justify-between">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => addOrCondition(block.id)}
-                        className="px-0"
-                      >
-                        <Plus className="mr-2 size-4" />
-                        OR Condition
-                      </Button>
-
-                      {conditionBlocks.length > 1 ? (
+                      {/* Block actions */}
+                      <div className="mt-3 flex items-center justify-between">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeBlock(block.id)}
-                          className="text-destructive hover:text-destructive"
+                          onClick={() => addOrCondition(block.id)}
+                          className="px-0"
                         >
-                          Delete Block
+                          <Plus className="mr-2 size-4" />
+                          OR Condition
                         </Button>
-                      ) : (
-                        <div />
-                      )}
+
+                        {conditionBlocks.length > 1 ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeBlock(block.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            Delete Block
+                          </Button>
+                        ) : (
+                          <div />
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            ))}
+
+            {/* Add AND block */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addAndBlock}
+              className="mt-4"
+            >
+              <Plus className="mr-2 size-4" />
+              AND Condition
+            </Button>
+
+            {/* Information */}
+            <div className="flex items-start gap-2 rounded-md bg-primary/5 px-3 py-2.5 mt-4">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+
+              <p className="text-xs text-muted-foreground">
+                The message will be sent only when at least one condition in
+                every condition block is satisfied. Conditions within the same
+                block use OR logic, while separate blocks use AND logic.
+              </p>
             </div>
-          ))}
-
-          {/* Add AND block */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addAndBlock}
-            className="mt-4"
-          >
-            <Plus className="mr-2 size-4" />
-            AND Condition
-          </Button>
-
-          {/* Information */}
-          <div className="flex items-start gap-2 rounded-md bg-primary/5 px-3 py-2.5 mt-4">
-            <Info className="mt-0.5 size-4 shrink-0 text-primary" />
-
-            <p className="text-xs text-muted-foreground">
-              The message will be sent only when at least one condition in every
-              condition block is satisfied. Conditions within the same block use
-              OR logic, while separate blocks use AND logic.
-            </p>
           </div>
         </div>
       )}

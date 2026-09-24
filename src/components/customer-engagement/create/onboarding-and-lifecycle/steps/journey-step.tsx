@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { ArrowRight, Clock3, Plus, Trash2 } from "lucide-react";
 
-import { Clock3, Plus, Trash2 } from "lucide-react";
-
+import { AppMultiSelect } from "@/components/common/app-multi-select";
 import { AppSelect } from "@/components/common/app-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,37 +28,23 @@ type JourneyStepItem = {
   waitUnit: WaitUnit;
   template: string;
   channel: string;
-  fallback: string;
+  fallback: string[];
   conditionMode: "always" | "conditional";
   conditionBlocks: JourneyConditionBlock[];
 };
 
-const getActionOptions = (stepIndex: number) => {
-  if (stepIndex === 0) {
-    return [
-      {
-        label: "Immediately after entry",
-        value: "immediately",
-      },
-      {
-        label: "After a delay",
-        value: "after-delay",
-      },
-    ];
-  }
-
-  return [
-    {
-      label: "Send immediately after previous journey",
-      value: "immediately",
-    },
-    {
-      label: "After a delay",
-      value: "after-delay",
-    },
-  ];
-};
 const actionOptions = [
+  {
+    label: "Immediately after entry",
+    value: "immediately",
+  },
+  {
+    label: "Delayed Notification",
+    value: "delayed-notification",
+  },
+];
+
+const subsequentActionOptions = [
   {
     label: "Immediately after entry",
     value: "immediately",
@@ -66,6 +52,13 @@ const actionOptions = [
   {
     label: "After a delay",
     value: "after-delay",
+  },
+];
+
+const forcedDelayedActionOptions = [
+  {
+    label: "Delayed Notification",
+    value: "delayed-notification",
   },
 ];
 
@@ -136,10 +129,14 @@ const waitUnitOptions = [
 
 const templateContent: Record<string, string> = {
   "welcome-to-kiibank": `
-    <div class="font-semibold">Welcome to KiiBank</div>
+    <div class="font-semibold">
+      Welcome to KiiBank
+    </div>
+
     <p class="mt-2 text-sm text-muted-foreground">
       Your KiiBank multi-currency account is ready.
-      Discover simple and secure ways to manage and move your money.
+      Discover simple and secure ways to manage and
+      move your money.
     </p>
   `,
 
@@ -147,30 +144,43 @@ const templateContent: Record<string, string> = {
     <div class="font-semibold">
       What You Can Do With Your KiiBank Account
     </div>
+
     <p class="mt-2 text-sm text-muted-foreground">
-      Explore the features available to help you manage your money
-      across currencies.
+      Explore the features available to help you
+      manage your money across currencies.
     </p>
   `,
 
   "using-gbp-account": `
-    <strong class="font-semibold">Using Your GBP Account</strong>
+    <strong class="font-semibold">
+      Using Your GBP Account
+    </strong>
+
     <p class="mt-2 text-sm text-muted-foreground">
-      Learn how to use your GBP account to receive and manage money.
+      Learn how to use your GBP account to receive
+      and manage money.
     </p>
   `,
 
   "sending-money": `
-    <strong class="font-semibold">Sending Money With KiiBank</strong>
+    <strong class="font-semibold">
+      Sending Money With KiiBank
+    </strong>
+
     <p class="mt-2 text-sm text-muted-foreground">
-      Send money securely to your saved recipients using KiiBank.
+      Send money securely to your saved recipients
+      using KiiBank.
     </p>
   `,
 
   "discover-more-features": `
-    <strong class="font-semibold">Discover More KiiBank Features</strong>
+    <strong class="font-semibold">
+      Discover More KiiBank Features
+    </strong>
+
     <p class="mt-2 text-sm text-muted-foreground">
-      Discover more ways to manage your money with KiiBank.
+      Discover more ways to manage your money with
+      KiiBank.
     </p>
   `,
 };
@@ -182,8 +192,22 @@ function getTemplateLabel(template: string) {
   );
 }
 
-function getFallbackOptions(selectedChannel: string) {
-  return channelOptions.filter((option) => option.value !== selectedChannel);
+function getChannelLabel(value: string) {
+  return (
+    channelOptions.find((option) => option.value === value)?.label ?? value
+  );
+}
+
+function getFallbackItems(selectedChannel: string) {
+  const selectedChannelLabel = getChannelLabel(selectedChannel);
+
+  return channelOptions
+    .map((option) => option.label)
+    .filter((label) => label !== selectedChannelLabel);
+}
+
+function isDelayedAction(action: string) {
+  return action === "after-delay" || action === "delayed-notification";
 }
 
 function formatWait(value: number, unit: WaitUnit) {
@@ -223,6 +247,10 @@ function TemplatePreviewPopover({ template }: { template: string }) {
         <div className="space-y-3">
           <div className="border-b pb-3">
             <p className="font-semibold">Template preview</p>
+
+            <p className="mt-1 text-xs text-muted-foreground">
+              {getTemplateLabel(template)}
+            </p>
           </div>
 
           <div
@@ -239,7 +267,7 @@ function TemplatePreviewPopover({ template }: { template: string }) {
 
 function formatJourneyTiming(steps: JourneyStepItem[]) {
   const activeSteps = steps.filter(
-    (step) => step.action === "after-delay" && step.waitValue > 0,
+    (step) => isDelayedAction(step.action) && step.waitValue > 0,
   );
 
   if (activeSteps.length === 0) {
@@ -278,24 +306,60 @@ function formatJourneyTiming(steps: JourneyStepItem[]) {
   return `${parts.join(", ")} after signup`;
 }
 
+function ChannelOrder({
+  channel,
+  fallback,
+}: {
+  channel: string;
+  fallback: string[];
+}) {
+  if (!channel || fallback.length === 0) {
+    return null;
+  }
+
+  const primaryChannel = getChannelLabel(channel);
+
+  const channels = [primaryChannel, ...fallback];
+
+  return (
+    <div className="rounded-lg border bg-muted/30 px-4 py-4">
+      <p className="mt-1 text-sm text-foreground">
+        KiiBank will try each fallback channel in the order selected.
+      </p>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        {channels.map((channelName, index) => (
+          <div
+            key={`${channelName}-${index}`}
+            className="flex items-center gap-2"
+          >
+            <div className="min-w-[120px] rounded-lg border bg-background px-3 py-2">
+              <p className="text-xs font-medium tracking-wide text-muted-foreground">
+                {index === 0 ? "Primary" : `Fallback ${index}`}
+              </p>
+
+              <p className="mt-0.5 truncate text-sm font-medium">
+                {channelName}
+              </p>
+            </div>
+
+            {index < channels.length - 1 && (
+              <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function JourneyStep() {
   const [conditionBlocks, setConditionBlocks] = useState<
     JourneyConditionBlock[]
   >([]);
 
   const [mode, setMode] = useState<"always" | "conditional">("always");
-  const initialActionOptions = [
-    { label: "Send immediately after entry", value: "immediately" },
-    { label: "After a delay", value: "after-delay" },
-  ];
 
-  const subsequentActionOptions = [
-    {
-      label: "Send immediately after previous journey",
-      value: "immediately",
-    },
-    { label: "After a delay", value: "after-delay" },
-  ];
   const [initialAction, setInitialAction] = useState("immediately");
 
   const [initialWaitValue, setInitialWaitValue] = useState(1);
@@ -306,30 +370,108 @@ export function JourneyStep() {
 
   const [initialChannel, setInitialChannel] = useState("");
 
-  const [initialFallback, setInitialFallback] = useState("");
+  const [initialFallback, setInitialFallback] = useState<string[]>([]);
 
   const [journeySteps, setJourneySteps] = useState<JourneyStepItem[]>([]);
 
-  const isInitialDelayed = initialAction === "after-delay";
+  const isInitialDelayed = initialAction === "delayed-notification";
 
   const initialJourneyTiming = isInitialDelayed
     ? `${formatWait(initialWaitValue, initialWaitUnit)} after signup`
     : "Immediately after signup";
 
-  const initialFallbackOptions = useMemo(
-    () => getFallbackOptions(initialChannel),
-    [initialChannel],
-  );
+  /*
+   * --------------------------------------------------
+   * Effective Send Logic
+   * --------------------------------------------------
+   *
+   * Journey Step 2:
+   * depends on Journey Step 1.
+   *
+   * Journey Step 3:
+   * depends on the EFFECTIVE action of Journey Step 2.
+   *
+   * Journey Step 4:
+   * depends on the EFFECTIVE action of Journey Step 3.
+   *
+   * This allows Delayed Notification to cascade.
+   */
+
+  const getEffectiveAction = (index: number): string => {
+    const step = journeySteps[index];
+
+    if (!step) {
+      return "immediately";
+    }
+
+    /*
+     * First generated journey step = Journey Step 2.
+     * Its previous step is Journey Step 1.
+     */
+    if (index === 0) {
+      if (isDelayedAction(initialAction)) {
+        return "delayed-notification";
+      }
+
+      return step.action;
+    }
+
+    /*
+     * Journey Step 3+ checks the effective
+     * action of the immediately preceding step.
+     */
+    const previousEffectiveAction = getEffectiveAction(index - 1);
+
+    if (isDelayedAction(previousEffectiveAction)) {
+      return "delayed-notification";
+    }
+
+    return step.action;
+  };
+
+  const isSendLocked = (index: number) => {
+    /*
+     * Journey Step 2
+     */
+    if (index === 0) {
+      return isDelayedAction(initialAction);
+    }
+
+    /*
+     * Journey Step 3+
+     */
+    const previousEffectiveAction = getEffectiveAction(index - 1);
+
+    return isDelayedAction(previousEffectiveAction);
+  };
 
   const handleInitialChannelChange = (value: string) => {
     setInitialChannel(value);
 
-    if (initialFallback === value) {
-      setInitialFallback("");
-    }
+    const selectedLabel = getChannelLabel(value);
+
+    setInitialFallback((fallbackChannels) =>
+      fallbackChannels.filter((channel) => channel !== selectedLabel),
+    );
   };
 
   const addJourneyStep = () => {
+    /*
+     * Important:
+     *
+     * Store the user's own action as
+     * "immediately".
+     *
+     * Do NOT permanently store the inherited
+     * delayed value.
+     *
+     * The effective action is calculated
+     * dynamically using getEffectiveAction().
+     *
+     * This means if an earlier journey is changed
+     * back to Immediate, later steps unlock
+     * correctly.
+     */
     setJourneySteps((steps) => [
       ...steps,
       {
@@ -339,7 +481,7 @@ export function JourneyStep() {
         waitUnit: "days",
         template: "",
         channel: "",
-        fallback: "",
+        fallback: [],
         conditionMode: "always",
         conditionBlocks: [],
       },
@@ -360,9 +502,12 @@ export function JourneyStep() {
   };
 
   const handleJourneyChannelChange = (step: JourneyStepItem, value: string) => {
+    const selectedLabel = getChannelLabel(value);
+
     updateJourneyStep(step.id, {
       channel: value,
-      ...(step.fallback === value ? { fallback: "" } : {}),
+
+      fallback: step.fallback.filter((channel) => channel !== selectedLabel),
     });
   };
 
@@ -371,24 +516,41 @@ export function JourneyStep() {
   };
 
   const getJourneyTiming = (index: number) => {
-    const currentStep = journeySteps[index];
+    const effectiveAction = getEffectiveAction(index);
 
-    if (currentStep.action === "immediately") {
-      return "Immediately after previous journey";
+    if (effectiveAction === "immediately") {
+      return "Immediately after entry";
     }
 
-    const previousSteps = journeySteps.slice(0, index + 1);
+    /*
+     * Build timing using EFFECTIVE actions,
+     * not only stored actions.
+     */
+    const previousSteps = journeySteps
+      .slice(0, index + 1)
+      .map((step, stepIndex) => ({
+        ...step,
 
-    const stepsForTiming = [
+        action: getEffectiveAction(stepIndex),
+      }));
+
+    const stepsForTiming: JourneyStepItem[] = [
       ...(isInitialDelayed
         ? [
             {
-              action: "after-delay",
+              id: 0,
+              action: "delayed-notification",
               waitValue: initialWaitValue,
               waitUnit: initialWaitUnit,
-            } as JourneyStepItem,
+              template: "",
+              channel: "",
+              fallback: [],
+              conditionMode: "always" as const,
+              conditionBlocks: [],
+            },
           ]
         : []),
+
       ...previousSteps,
     ];
 
@@ -398,50 +560,52 @@ export function JourneyStep() {
   return (
     <div className="space-y-6">
       {/* Journey Step 1 */}
+
       <div className="rounded-xl border bg-background">
         <div className="border-b px-5 py-4">
           <p className="font-semibold">Journey Step 1</p>
         </div>
 
         <div className="space-y-5 p-5">
-          {/* Action */}
-          <div className="grid gap-5 md:grid-cols-2">
+          {/* Send */}
+
+          <div className="grid gap-5">
             <AppSelect
-              label="Action Type"
+              label="Send"
               value={initialAction}
               onValueChange={setInitialAction}
               placeholder="Select"
               options={actionOptions}
+              required
             />
 
             {isInitialDelayed && (
-              <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
-                <div className="space-y-2">
-                  <Label>
-                    Wait Value <span className="text-destructive">*</span>
-                  </Label>
+              <div className="grid gap-2 bg-muted/60 p-4 rounded-lg">
+                <p className="font-semibold text-foreground">Wait</p>
+                <div className="grid gap-3 grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>
+                      Wait Value <span className="text-destructive">*</span>
+                    </Label>
 
-                  <Input
-                    type="number"
-                    min={1}
-                    value={initialWaitValue}
-                    onChange={(event) =>
-                      setInitialWaitValue(Number(event.target.value) || 0)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>
-                    Wait Unit <span className="text-destructive">*</span>
-                  </Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={initialWaitValue}
+                      onChange={(event) =>
+                        setInitialWaitValue(Number(event.target.value) || 0)
+                      }
+                    />
+                  </div>
 
                   <AppSelect
+                    label="Wait Unit"
                     value={initialWaitUnit}
                     onValueChange={(value) =>
                       setInitialWaitUnit(value as WaitUnit)
                     }
                     options={waitUnitOptions}
+                    required
                   />
                 </div>
               </div>
@@ -449,6 +613,7 @@ export function JourneyStep() {
           </div>
 
           {/* Journey Timing */}
+
           <div className="rounded-lg border bg-muted/30 px-4 py-3">
             <p className="text-xs text-muted-foreground">Journey timing</p>
 
@@ -456,6 +621,7 @@ export function JourneyStep() {
           </div>
 
           {/* Message / Channel / Fallback */}
+
           <div className="grid gap-5 md:grid-cols-3">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -485,14 +651,22 @@ export function JourneyStep() {
               required
             />
 
-            <AppSelect
+            <AppMultiSelect
               label="Fallback Channel"
+              items={getFallbackItems(initialChannel)}
               value={initialFallback}
-              onValueChange={setInitialFallback}
-              placeholder="Select fallback channel"
-              options={initialFallbackOptions}
+              setValue={setInitialFallback}
+              placeholder="Select fallback channels"
             />
           </div>
+
+          {/* Channel Order */}
+
+          {initialFallback.length > 0 && (
+            <ChannelOrder channel={initialChannel} fallback={initialFallback} />
+          )}
+
+          {/* Message Condition */}
 
           <JourneyMessageCondition
             mode={mode}
@@ -504,11 +678,24 @@ export function JourneyStep() {
       </div>
 
       {/* Subsequent Journey Steps */}
+
       {journeySteps.map((step, index) => {
-        const fallbackOptions = getFallbackOptions(step.channel);
+        const fallbackItems = getFallbackItems(step.channel);
+
+        const sendLocked = isSendLocked(index);
+
+        /*
+         * The displayed Send value is based
+         * on the effective journey state.
+         */
+        const displayedAction = getEffectiveAction(index);
+
+        const showDelayFields = isDelayedAction(displayedAction);
 
         return (
           <div key={step.id} className="rounded-xl border bg-background">
+            {/* Header */}
+
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div>
                 <p className="font-semibold">Journey Step {index + 2}</p>
@@ -530,45 +717,51 @@ export function JourneyStep() {
             </div>
 
             <div className="space-y-5 p-5">
-              {/* Action */}
-              <div className="grid gap-5 md:grid-cols-2">
+              {/* Send */}
+
+              <div className="grid gap-5 ">
                 <AppSelect
-                  label="Action"
-                  value={step.action}
+                  label="Send"
+                  value={displayedAction}
                   onValueChange={(value) =>
                     updateJourneyStep(step.id, {
                       action: value,
                     })
                   }
                   options={
-                    index === 1 ? initialActionOptions : subsequentActionOptions
+                    sendLocked
+                      ? forcedDelayedActionOptions
+                      : subsequentActionOptions
                   }
+                  disabled={sendLocked}
+                  required
                 />
-                {step.action === "after-delay" && (
-                  <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
-                    <div className="space-y-2">
-                      <Label>
-                        Wait Value <span className="text-destructive">*</span>
-                      </Label>
 
-                      <Input
-                        type="number"
-                        min={1}
-                        value={step.waitValue}
-                        onChange={(event) =>
-                          updateJourneyStep(step.id, {
-                            waitValue: Number(event.target.value) || 0,
-                          })
-                        }
-                      />
-                    </div>
+                {/* Delay configuration */}
 
-                    <div className="space-y-2">
-                      <Label>
-                        Wait Unit <span className="text-destructive">*</span>
-                      </Label>
+                {showDelayFields && (
+                  <div className="grid gap-2 bg-muted/60 p-4 rounded-lg">
+                    <p className="font-semibold text-foreground">Wait</p>
+                    <div className="grid gap-3 grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>
+                          Wait Value <span className="text-destructive">*</span>
+                        </Label>
+
+                        <Input
+                          type="number"
+                          min={1}
+                          value={step.waitValue}
+                          onChange={(event) =>
+                            updateJourneyStep(step.id, {
+                              waitValue: Number(event.target.value) || 0,
+                            })
+                          }
+                        />
+                      </div>
 
                       <AppSelect
+                        label="Wait Unit"
                         value={step.waitUnit}
                         onValueChange={(value) =>
                           updateJourneyStep(step.id, {
@@ -576,6 +769,7 @@ export function JourneyStep() {
                           })
                         }
                         options={waitUnitOptions}
+                        required
                       />
                     </div>
                   </div>
@@ -583,6 +777,7 @@ export function JourneyStep() {
               </div>
 
               {/* Journey Timing */}
+
               <div className="rounded-lg border bg-muted/30 px-4 py-3">
                 <div className="flex items-start gap-2">
                   <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
@@ -600,6 +795,7 @@ export function JourneyStep() {
               </div>
 
               {/* Message / Channel / Fallback */}
+
               <div className="grid gap-5 md:grid-cols-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -636,18 +832,31 @@ export function JourneyStep() {
                   required
                 />
 
-                <AppSelect
+                <AppMultiSelect
                   label="Fallback Channel"
+                  items={fallbackItems}
                   value={step.fallback}
-                  onValueChange={(value) =>
+                  setValue={(value) => {
+                    const nextValue =
+                      typeof value === "function"
+                        ? value(step.fallback)
+                        : value;
+
                     updateJourneyStep(step.id, {
-                      fallback: value,
-                    })
-                  }
-                  placeholder="Select fallback channel"
-                  options={fallbackOptions}
+                      fallback: nextValue,
+                    });
+                  }}
+                  placeholder="Select fallback channels"
                 />
               </div>
+
+              {/* Channel Order */}
+
+              {step.fallback.length > 0 && (
+                <ChannelOrder channel={step.channel} fallback={step.fallback} />
+              )}
+
+              {/* Message Condition */}
 
               <JourneyMessageCondition
                 mode={step.conditionMode}
@@ -667,6 +876,8 @@ export function JourneyStep() {
           </div>
         );
       })}
+
+      {/* Add Journey */}
 
       <Button type="button" variant="outline" onClick={addJourneyStep}>
         <Plus className="mr-2 size-4" />
