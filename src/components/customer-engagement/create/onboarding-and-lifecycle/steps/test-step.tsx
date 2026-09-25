@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CheckCircle2, Info, Send } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import { CheckCircle2, Info } from "lucide-react";
 
 import { AppSelect } from "@/components/common/app-select";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,11 +15,19 @@ import {
   type TemplateVariant,
 } from "../../shared/template-preview";
 
-import { channelLabels, journeyData } from "../data/journey-preview-data";
+import {
+  channelLabels,
+  journeyData,
+  type JourneyPreviewItem,
+} from "../data/journey-preview-data";
 
 export function TestStep() {
   const [selectedJourneyId, setSelectedJourneyId] = useState(
     String(journeyData[0].id),
+  );
+
+  const [selectedChannel, setSelectedChannel] = useState<TemplateVariant>(
+    journeyData[0].channel,
   );
 
   const [recipient, setRecipient] = useState("");
@@ -33,6 +43,17 @@ export function TestStep() {
     );
   }, [selectedJourneyId]);
 
+  /**
+   * Primary + fallback channels.
+   *
+   * Their order is also the configured
+   * delivery order.
+   */
+  const availableChannels = useMemo<TemplateVariant[]>(
+    () => [selectedJourney.channel, ...selectedJourney.fallbackChannels],
+    [selectedJourney],
+  );
+
   const journeyOptions = useMemo(
     () =>
       journeyData.map((step) => ({
@@ -42,9 +63,39 @@ export function TestStep() {
     [],
   );
 
+  /**
+   * When journey message changes:
+   *
+   * - Reset preview to primary channel
+   * - Clear previous recipient
+   * - Clear previous success state
+   */
+  useEffect(() => {
+    setSelectedChannel(selectedJourney.channel);
+
+    setRecipient("");
+    setSent(false);
+  }, [selectedJourney]);
+
   const handleJourneyChange = (value: string) => {
     setSelectedJourneyId(value);
+  };
 
+  /**
+   * TemplatePreview controls which
+   * configured channel is being viewed/tested.
+   */
+  const handleChannelChange = (channel: TemplateVariant) => {
+    setSelectedChannel(channel);
+
+    /**
+     * The recipient type could change from:
+     *
+     * Email -> Phone
+     * Phone -> Customer ID
+     *
+     * So clear stale recipient data.
+     */
     setRecipient("");
     setSent(false);
   };
@@ -61,14 +112,21 @@ export function TestStep() {
       /**
        * TODO:
        *
-       * Replace this with your dedicated test-send
-       * API/server action.
+       * Replace with dedicated
+       * test-send API/server action.
        *
        * await sendJourneyTest({
-       *   journeyStepId: selectedJourney.id,
-       *   channel: selectedJourney.channel,
+       *   journeyStepId:
+       *     selectedJourney.id,
+       *
+       *   channel:
+       *     selectedChannel,
+       *
        *   recipient,
        * });
+       *
+       * This should NOT execute
+       * production journey logic.
        */
 
       await new Promise((resolve) => setTimeout(resolve, 900));
@@ -81,15 +139,16 @@ export function TestStep() {
 
   return (
     <div className="space-y-6">
-      {/* Select Journey Message */}
+      {/* ------------------------------------ */}
+      {/* Journey Message                     */}
+      {/* ------------------------------------ */}
 
       <section className="space-y-5 rounded-xl border bg-background p-5">
         <div>
           <h3 className="text-sm font-semibold">Select Journey Message</h3>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Choose the journey message you want to preview and send to a test
-            recipient.
+            Select the journey message that you want to preview and test.
           </p>
         </div>
 
@@ -104,75 +163,70 @@ export function TestStep() {
           />
         </div>
 
-        {/* Selected Journey Information */}
+        {/* -------------------------------- */}
+        {/* Journey Configuration           */}
+        {/* -------------------------------- */}
 
-        <div className="grid gap-3 rounded-lg bg-muted p-4 sm:grid-cols-3">
-          <JourneyInfo label="Timing" value={selectedJourney.timing} />
-
-          <JourneyInfo
-            label="Channel"
-            value={channelLabels[selectedJourney.channel]}
-          />
-
-          <JourneyInfo label="Condition" value={selectedJourney.condition} />
-        </div>
+        <JourneyInformation journey={selectedJourney} />
       </section>
 
-      {/* Preview */}
+      {/* ------------------------------------ */}
+      {/* Preview                             */}
+      {/* ------------------------------------ */}
 
       <TemplatePreview
         title={selectedJourney.message}
-        description={`Preview for ${channelLabels[selectedJourney.channel]}`}
-        channels={selectedJourney.channel}
-        variant={selectedJourney.channel}
+        description="Preview the message across its configured channels."
+        channels={availableChannels}
+        variant={selectedChannel}
+        onVariantChange={handleChannelChange}
         htmlContent={selectedJourney.htmlContent}
       />
 
-      {/* Send Test */}
+      {/* ------------------------------------ */}
+      {/* Send Test                           */}
+      {/* ------------------------------------ */}
 
       <section className="space-y-5 rounded-xl border bg-background p-5">
         <div>
           <h3 className="text-sm font-semibold">Send Test</h3>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Send the selected journey message through its configured channel.
+            Send the selected journey message through{" "}
+            <span className="font-medium text-foreground">
+              {channelLabels[selectedChannel]}
+            </span>
+            .
           </p>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="test-recipient">
-            Test Recipient
-            <span className="ml-1 text-destructive">*</span>
-          </Label>
+        {/* Recipient */}
 
-          <Input
-            id="test-recipient"
-            value={recipient}
-            onChange={(event) => {
-              setRecipient(event.target.value);
+        <TestRecipientField
+          channel={selectedChannel}
+          value={recipient}
+          onChange={(value) => {
+            setRecipient(value);
+            setSent(false);
+          }}
+        />
 
-              setSent(false);
-            }}
-            placeholder={getRecipientPlaceholder(selectedJourney.channel)}
-          />
-
-          <p className="text-xs text-muted-foreground">
-            {getRecipientHelper(selectedJourney.channel)}
-          </p>
-        </div>
+        {/* Send */}
 
         <div className="flex justify-end">
           <Button
             type="button"
+            variant="secondary"
             onClick={handleSendTest}
             disabled={!recipient.trim() || isSending}
-            variant={"secondary"}
           >
             {isSending
               ? "Sending..."
-              : `Send Test ${channelLabels[selectedJourney.channel]}`}
+              : `Send Test ${channelLabels[selectedChannel]}`}
           </Button>
         </div>
+
+        {/* Success */}
 
         {sent && (
           <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-4">
@@ -183,7 +237,7 @@ export function TestStep() {
 
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 {selectedJourney.message} was sent through{" "}
-                {channelLabels[selectedJourney.channel]} to {recipient}.
+                {channelLabels[selectedChannel]} to {recipient}.
               </p>
             </div>
           </div>
@@ -211,46 +265,194 @@ export function TestStep() {
   );
 }
 
-function JourneyInfo({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
+/**
+ * ------------------------------------------
+ * Journey Information
+ * ------------------------------------------
+ */
 
-      <p className="mt-1 text-sm font-medium">{value}</p>
+function JourneyInformation({ journey }: { journey: JourneyPreviewItem }) {
+  return (
+    <div className="grid gap-5 rounded-lg bg-muted p-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Send */}
+
+      <div>
+        <InfoLabel>Send</InfoLabel>
+
+        <div className="mt-1">
+          <p className="text-sm font-medium">{getSendLabel(journey)}</p>
+
+          {journey.send === "delayed-notification" &&
+            journey.waitValue &&
+            journey.waitUnit && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {formatWait(journey.waitValue, journey.waitUnit)}
+              </p>
+            )}
+        </div>
+      </div>
+
+      {/* Channel */}
+
+      <div>
+        <InfoLabel>Channel</InfoLabel>
+
+        <div className="mt-1">
+          <Badge variant="outline" className="bg-background">
+            {channelLabels[journey.channel]}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Fallback */}
+
+      <div>
+        <InfoLabel>Fallback Channel</InfoLabel>
+
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {journey.fallbackChannels.length > 0 ? (
+            journey.fallbackChannels.map((channel) => (
+              <Badge key={channel} variant="outline" className="bg-background">
+                {channelLabels[channel]}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm font-medium">None</span>
+          )}
+        </div>
+      </div>
+
+      {/* Condition */}
+
+      <div>
+        <InfoLabel>Step Condition</InfoLabel>
+
+        <p className="mt-1 text-sm font-medium">
+          {journey.conditionMode === "always" ? "Always send" : "Has condition"}
+        </p>
+      </div>
     </div>
   );
 }
 
-function getRecipientPlaceholder(channel: TemplateVariant) {
+function InfoLabel({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs text-muted-foreground">{children}</p>;
+}
+
+/**
+ * ------------------------------------------
+ * Test Recipient
+ * ------------------------------------------
+ */
+
+function TestRecipientField({
+  channel,
+  value,
+  onChange,
+}: {
+  channel: TemplateVariant;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const config = getRecipientConfig(channel);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor="test-recipient">
+        {config.label}
+
+        <span className="ml-1 text-destructive">*</span>
+      </Label>
+
+      <Input
+        id="test-recipient"
+        type={config.type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={config.placeholder}
+      />
+
+      <p className="text-xs text-muted-foreground">{config.helper}</p>
+    </div>
+  );
+}
+
+function getRecipientConfig(channel: TemplateVariant): {
+  label: string;
+  type: "text" | "email" | "tel";
+  placeholder: string;
+  helper: string;
+} {
   switch (channel) {
     case "email":
-      return "Enter test email address";
+      return {
+        label: "Test Email Address",
+        type: "email",
+        placeholder: "name@example.com",
+        helper: "Enter the email address that should receive the test email.",
+      };
+
+    case "whatsapp":
+      return {
+        label: "WhatsApp Number",
+        type: "tel",
+        placeholder: "+44 7700 900123",
+        helper: "Enter a WhatsApp-enabled phone number.",
+      };
 
     case "sms":
-    case "whatsapp":
-      return "Enter test phone number";
+      return {
+        label: "Test Phone Number",
+        type: "tel",
+        placeholder: "+44 7700 900123",
+        helper: "Enter a valid phone number that can receive SMS.",
+      };
 
     case "push":
+      return {
+        label: "Test Customer",
+        type: "text",
+        placeholder: "Enter customer ID or account",
+        helper: "Enter a test customer with an eligible registered device.",
+      };
+
     case "in-app":
-      return "Enter test customer identifier";
+      return {
+        label: "Test Customer",
+        type: "text",
+        placeholder: "Enter customer ID or account",
+        helper:
+          "Enter the customer account that should receive the in-app message.",
+      };
   }
 }
 
-function getRecipientHelper(channel: TemplateVariant) {
-  switch (channel) {
-    case "email":
-      return "Enter the email address that should receive the test email.";
+/**
+ * ------------------------------------------
+ * Helpers
+ * ------------------------------------------
+ */
 
-    case "whatsapp":
-      return "Enter a WhatsApp-enabled test phone number.";
-
-    case "sms":
-      return "Enter a valid test phone number.";
-
-    case "push":
-      return "Enter a test customer with an eligible device for push notifications.";
-
-    case "in-app":
-      return "Enter a test customer account for the in-app message.";
+function getSendLabel(journey: JourneyPreviewItem) {
+  if (journey.send === "delayed-notification") {
+    return "Delayed Notification";
   }
+
+  return "Immediately after entry";
+}
+
+function formatWait(
+  value: number,
+  unit: "hours" | "days" | "weeks" | "months",
+) {
+  const labels = {
+    hours: "hour",
+    days: "day",
+    weeks: "week",
+    months: "month",
+  };
+
+  const label = labels[unit];
+
+  return `${value} ${value === 1 ? label : `${label}s`}`;
 }

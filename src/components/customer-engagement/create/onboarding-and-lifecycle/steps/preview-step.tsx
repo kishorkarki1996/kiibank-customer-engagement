@@ -1,18 +1,25 @@
 "use client";
 
 import { useState } from "react";
+
 import { Eye, Users2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { TemplatePreview } from "../../shared/template-preview";
+import {
+  TemplatePreview,
+  type TemplateVariant,
+} from "../../shared/template-preview";
 
 import {
   channelLabels,
@@ -20,11 +27,25 @@ import {
   type JourneyPreviewItem,
 } from "../data/journey-preview-data";
 
+type PreviewState = {
+  journey: JourneyPreviewItem;
+  channel: TemplateVariant;
+} | null;
+
 export function PreviewStep() {
   const includeExistingCustomers = true;
 
-  const [previewMessage, setPreviewMessage] =
-    useState<JourneyPreviewItem | null>(null);
+  const [previewMessage, setPreviewMessage] = useState<PreviewState>(null);
+
+  const handlePreview = (
+    journey: JourneyPreviewItem,
+    channel: TemplateVariant,
+  ) => {
+    setPreviewMessage({
+      journey,
+      channel,
+    });
+  };
 
   return (
     <>
@@ -78,8 +99,8 @@ export function PreviewStep() {
             <h3 className="text-sm font-semibold">Journey</h3>
 
             <p className="mt-1 text-xs text-muted-foreground">
-              Review the configured journey messages and preview each message
-              before continuing.
+              Review the configured journey messages and preview each delivery
+              channel before continuing.
             </p>
           </div>
 
@@ -95,16 +116,12 @@ export function PreviewStep() {
                     Message
                   </th>
 
-                  <th className="whitespace-nowrap px-5 py-3 text-left font-medium text-muted-foreground">
+                  <th className="min-w-[180px] px-5 py-3 text-left font-medium text-muted-foreground">
                     Channel
                   </th>
 
-                  <th className="w-[90px] px-5 py-3 text-center font-medium text-muted-foreground">
-                    Preview
-                  </th>
-
-                  <th className="min-w-[160px] px-5 py-3 text-left font-medium text-muted-foreground">
-                    Condition
+                  <th className="min-w-[240px] px-5 py-3 text-left font-medium text-muted-foreground">
+                    Fallback Channel
                   </th>
                 </tr>
               </thead>
@@ -112,37 +129,46 @@ export function PreviewStep() {
               <tbody className="divide-y">
                 {journeyData.map((step) => (
                   <tr key={step.id}>
+                    {/* Timing */}
+
                     <td className="whitespace-nowrap px-5 py-4">
                       <span className="font-medium">{step.timing}</span>
                     </td>
 
+                    {/* Message */}
+
                     <td className="px-5 py-4">{step.message}</td>
 
+                    {/* Primary Channel */}
+
                     <td className="px-5 py-4">
-                      <Badge variant="outline">
-                        {channelLabels[step.channel]}
-                      </Badge>
+                      <ChannelPreviewButton
+                        channel={step.channel}
+                        label={channelLabels[step.channel]}
+                        onClick={() => handlePreview(step, step.channel)}
+                      />
                     </td>
 
-                    <td className="px-5 py-4 text-center">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setPreviewMessage(step)}
-                            aria-label={`Preview ${step.message}`}
-                          >
-                            <Eye className="size-4" />
-                          </Button>
-                        </TooltipTrigger>
+                    {/* Fallback Channels */}
 
-                        <TooltipContent>Preview message</TooltipContent>
-                      </Tooltip>
+                    <td className="px-5 py-4">
+                      {step.fallbackChannels.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {step.fallbackChannels.map((channel) => (
+                            <ChannelPreviewButton
+                              key={channel}
+                              channel={channel}
+                              label={channelLabels[channel]}
+                              onClick={() => handlePreview(step, channel)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">
+                          None
+                        </span>
+                      )}
                     </td>
-
-                    <td className="px-5 py-4">{step.condition}</td>
                   </tr>
                 ))}
               </tbody>
@@ -190,7 +216,7 @@ export function PreviewStep() {
         </section>
       </div>
 
-      {/* Quick Preview Dialog */}
+      {/* Channel Preview Dialog */}
 
       <Dialog
         open={Boolean(previewMessage)}
@@ -203,18 +229,48 @@ export function PreviewStep() {
         <DialogContent className="max-h-[90vh] overflow-y-auto p-10 sm:max-w-2xl">
           {previewMessage && (
             <TemplatePreview
-              title={previewMessage.message}
+              title={previewMessage.journey.message}
               description={`Preview for ${
                 channelLabels[previewMessage.channel]
               }`}
               channels={previewMessage.channel}
               variant={previewMessage.channel}
-              htmlContent={previewMessage.htmlContent}
+              htmlContent={previewMessage.journey.htmlContent}
             />
           )}
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function ChannelPreviewButton({
+  channel,
+  label,
+  onClick,
+}: {
+  channel: TemplateVariant;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          size="xs"
+          onClick={onClick}
+          className="h-8 gap-2"
+          aria-label={`Preview ${label}`}
+        >
+          <span>{label}</span>
+          {/* <Eye className="size-3.5" /> */}
+        </Button>
+      </TooltipTrigger>
+
+      <TooltipContent>Preview {label}</TooltipContent>
+    </Tooltip>
   );
 }
 

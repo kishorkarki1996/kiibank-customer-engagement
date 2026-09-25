@@ -32,10 +32,6 @@ const summaryItems = [
     value: "Enforced",
   },
   {
-    label: "Frequency Rules",
-    value: "KiiBank Global",
-  },
-  {
     label: "Owner",
     value: "Customer Engagement Team",
   },

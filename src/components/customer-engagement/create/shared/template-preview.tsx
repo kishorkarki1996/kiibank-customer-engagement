@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export type TemplateVariant = "push" | "whatsapp" | "email" | "in-app" | "sms";
 
@@ -92,27 +93,37 @@ export function TemplatePreview({
   return (
     <section className="overflow-hidden rounded-xl border bg-background">
       <div className="border-b px-5 py-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h3 className="text-sm font-semibold">{title}</h3>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            {title && <h3 className="text-sm font-semibold">{title}</h3>}
 
-            <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+            {description && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {description}
+              </p>
+            )}
           </div>
 
-          {availableChannels.length > 1 && (
-            <Tabs value={activeVariant} onValueChange={handleVariantChange}>
-              <TabsList className="h-auto flex-wrap bg-muted/50">
+          {availableChannels.length > 1 ? (
+            <Tabs
+              value={activeVariant}
+              onValueChange={(value) =>
+                handleVariantChange(value as TemplateVariant)
+              }
+              className="shrink-0"
+            >
+              <TabsList>
                 {availableChannels.map((channel) => (
-                  <TabsTrigger
-                    key={channel}
-                    value={channel}
-                    className="px-3 data-[state=active]:bg-background"
-                  >
+                  <TabsTrigger key={channel} value={channel}>
                     {channelLabels[channel]}
                   </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>
+          ) : (
+            <Badge variant="outline" className="shrink-0 bg-background">
+              {channelLabels[availableChannels[0]]}
+            </Badge>
           )}
         </div>
       </div>
