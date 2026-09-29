@@ -1,84 +1,220 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Info } from "lucide-react";
+import { useState } from "react";
 
-import { AppMultiSelect } from "@/components/common/app-multi-select";
-import { AppSelect } from "@/components/common/app-select";
+import { getAvailableFields } from "../steps/data/behaviour-rule-data";
 
-import {
-  behaviourFieldOptions,
-  behaviourTypeOptions,
-  type BehaviourType,
-} from "./data/behaviour-rule-data";
+import { TransactionBehaviourRules } from "../components/transaction-behaviour-rules";
 
-export function BehaviourRulesStep() {
-  const [behaviourTypes, setBehaviourTypes] = useState<string[]>([]);
+import { type TransactionRuleGroup } from "../components/transaction-rule-block";
 
-  const [field, setField] = useState("");
+import type { TransactionRule } from "../components/transaction-rule-row";
 
-  const fieldOptions = useMemo(() => {
-    const selectedTypes = behaviourTypes as BehaviourType[];
+function createRule(): TransactionRule {
+  return {
+    id: crypto.randomUUID(),
 
-    const combinedOptions = selectedTypes.flatMap(
-      (type) => behaviourFieldOptions[type] ?? [],
+    field: "",
+    operator: "",
+
+    value: "",
+    valueTo: "",
+
+    period: "",
+    periodValue: "",
+
+    customFrom: undefined,
+    customTo: undefined,
+  };
+}
+
+function createRuleGroup(): TransactionRuleGroup {
+  return {
+    id: crypto.randomUUID(),
+
+    conditions: [createRule()],
+  };
+}
+
+export function TransactionBehaviourRulesStep() {
+  const [activities, setActivities] = useState<string[]>([]);
+
+  const [conditionBlocks, setConditionBlocks] = useState<
+    TransactionRuleGroup[]
+  >([]);
+
+  const availableFields = getAvailableFields(activities);
+
+  /**
+   * Activity selection
+   */
+
+  const handleActivitiesChange = (values: string[]) => {
+    setActivities(values);
+
+    const nextFields = getAvailableFields(values);
+
+    const validFields = new Set(nextFields.map((field) => field.value));
+
+    setConditionBlocks((blocks) => {
+      /**
+       * First selected activity:
+       * automatically create first block.
+       */
+      if (values.length > 0 && blocks.length === 0) {
+        return [createRuleGroup()];
+      }
+
+      /**
+       * Clear only rules whose selected
+       * field is no longer valid.
+       */
+      return blocks.map(
+        (block): TransactionRuleGroup => ({
+          ...block,
+
+          conditions: block.conditions.map((rule): TransactionRule => {
+            if (!rule.field || validFields.has(rule.field)) {
+              return rule;
+            }
+
+            return {
+              ...rule,
+
+              field: "",
+              operator: "",
+
+              value: "",
+              valueTo: "",
+
+              period: "",
+              periodValue: "",
+
+              customFrom: undefined,
+
+              customTo: undefined,
+            };
+          }),
+        }),
+      );
+    });
+  };
+
+  /**
+   * Add OR condition
+   *
+   * Adds another rule inside
+   * the same block.
+   */
+
+  const handleAddOrCondition = (blockId: string) => {
+    setConditionBlocks((blocks) =>
+      blocks.map((block) =>
+        block.id === blockId
+          ? {
+              ...block,
+
+              conditions: [...block.conditions, createRule()],
+            }
+          : block,
+      ),
     );
+  };
 
-    return Array.from(
-      new Map(combinedOptions.map((option) => [option.value, option])).values(),
+  /**
+   * Add AND block
+   *
+   * Adds another complete block.
+   */
+
+  const handleAddAndBlock = () => {
+    setConditionBlocks((blocks) => [...blocks, createRuleGroup()]);
+  };
+
+  /**
+   * Update rule
+   */
+
+  const handleUpdateCondition = (
+    blockId: string,
+    ruleId: string,
+    updates: Partial<TransactionRule>,
+  ) => {
+    setConditionBlocks((blocks) =>
+      blocks.map((block) =>
+        block.id === blockId
+          ? {
+              ...block,
+
+              conditions: block.conditions.map((rule) =>
+                rule.id === ruleId
+                  ? {
+                      ...rule,
+                      ...updates,
+                    }
+                  : rule,
+              ),
+            }
+          : block,
+      ),
     );
-  }, [behaviourTypes]);
+  };
 
-  useEffect(() => {
-    if (!field) {
-      return;
-    }
+  /**
+   * Remove OR condition
+   */
 
-    const fieldStillAvailable = fieldOptions.some(
-      (option) => option.value === field,
+  const handleRemoveCondition = (blockId: string, ruleId: string) => {
+    setConditionBlocks((blocks) =>
+      blocks.map((block) => {
+        if (block.id !== blockId) {
+          return block;
+        }
+
+        /**
+         * If this is the last condition
+         * in the block, keep one empty rule.
+         */
+        if (block.conditions.length === 1) {
+          return {
+            ...block,
+
+            conditions: [createRule()],
+          };
+        }
+
+        return {
+          ...block,
+
+          conditions: block.conditions.filter(
+            (condition) => condition.id !== ruleId,
+          ),
+        };
+      }),
     );
+  };
 
-    if (!fieldStillAvailable) {
-      setField("");
-    }
-  }, [fieldOptions, field]);
+  /**
+   * Delete entire block
+   */
+
+  const handleRemoveBlock = (blockId: string) => {
+    setConditionBlocks((blocks) =>
+      blocks.filter((block) => block.id !== blockId),
+    );
+  };
 
   return (
-    <div className="space-y-6">
-      <section className="space-y-5">
-        <div className="grid gap-5 md:grid-cols-2">
-          <AppMultiSelect
-            label="What customer activity do you want to evaluate?"
-            items={behaviourTypeOptions}
-            value={behaviourTypes}
-            setValue={setBehaviourTypes}
-            placeholder="Select customer activity"
-          />
-
-          <AppSelect
-            label="Field"
-            value={field}
-            onValueChange={setField}
-            placeholder={
-              behaviourTypes.length
-                ? "Select field"
-                : "Select customer activity first"
-            }
-            options={fieldOptions}
-            disabled={behaviourTypes.length === 0}
-            required
-          />
-        </div>
-
-        <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
-          <Info className="mt-0.5 size-4 shrink-0 text-primary" />
-
-          <p className="text-xs leading-5 text-muted-foreground">
-            You can select more than one customer activity. The Field dropdown
-            will combine the available fields from all selected activity types.
-          </p>
-        </div>
-      </section>
-    </div>
+    <TransactionBehaviourRules
+      activities={activities}
+      availableFields={availableFields}
+      conditionBlocks={conditionBlocks}
+      onActivitiesChange={handleActivitiesChange}
+      onAddOrCondition={handleAddOrCondition}
+      onUpdateCondition={handleUpdateCondition}
+      onRemoveCondition={handleRemoveCondition}
+      onAddAndBlock={handleAddAndBlock}
+      onRemoveBlock={handleRemoveBlock}
+    />
   );
 }

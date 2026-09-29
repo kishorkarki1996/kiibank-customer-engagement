@@ -23,7 +23,7 @@ import { StepActions } from "../step-actions";
 import { StepHeader } from "../step-header";
 import { BasicInformationStep } from "./steps/basic-information-step";
 import { CustomerAudienceStep } from "./steps/customer-audience-step";
-import { BehaviourRulesStep } from "./steps/transaction-behaviour-rules-step";
+import { TransactionBehaviourRulesStep } from "./steps/transaction-behaviour-rules-step";
 
 // import { AudienceStep } from "./steps/audience";
 // import { EntryTriggerStep } from "./steps/entry-trigger";
@@ -43,8 +43,8 @@ const steps = [
     label: "Customer audience",
   },
   {
-    id: "entry-trigger",
-    label: "Entry trigger",
+    id: "behaviour-rules",
+    label: "Transaction Behaviour & Rules",
   },
   {
     id: "journey",
@@ -171,7 +171,7 @@ export function TransactionBehaviourBuilder() {
 
   return (
     <>
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:px-6 lg:grid-cols-[230px_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-[1350px] gap-6 px-4 py-6 md:px-6 lg:grid-cols-[230px_minmax(0,1fr)]">
         <EngagementStepper
           steps={steps}
           currentStep={currentStep}
@@ -186,7 +186,7 @@ export function TransactionBehaviourBuilder() {
 
             {currentStep === 1 && <CustomerAudienceStep />}
 
-            {currentStep === 2 && <BehaviourRulesStep />}
+            {currentStep === 2 && <TransactionBehaviourRulesStep />}
 
             {/*{currentStep === 3 && <JourneyStep />}
 
