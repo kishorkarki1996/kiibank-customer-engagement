@@ -24,6 +24,14 @@ import { StepHeader } from "../step-header";
 import { BasicInformationStep } from "./steps/basic-information-step";
 import { CustomerAudienceStep } from "./steps/customer-audience-step";
 import { TransactionBehaviourRulesStep } from "./steps/transaction-behaviour-rules-step";
+import { PreviewQualifiedAudienceStep } from "./steps/qualified-audience-step";
+import { ExecutionTypeStep } from "./steps/execution-type-step";
+import { MessageChannelStep } from "./steps/message-channel-step";
+import { FrequencyControlsStep } from "./steps/frequency-controls-step";
+import { ExitConditionStep } from "./steps/exit-condition-step";
+import { ConversionStep } from "./steps/conversion-step";
+import { PreviewTestStep } from "./steps/preview-test-step";
+import { ReviewActivateStep } from "./steps/review-activate-step";
 
 // import { AudienceStep } from "./steps/audience";
 // import { EntryTriggerStep } from "./steps/entry-trigger";
@@ -44,23 +52,35 @@ const steps = [
   },
   {
     id: "behaviour-rules",
-    label: "Transaction Behaviour & Rules",
+    label: "Behaviour & Rules",
   },
   {
-    id: "journey",
-    label: "Build journey",
+    id: "qualitifed-audience",
+    label: "Qualified Audience",
   },
   {
-    id: "communication-controls",
-    label: "Communication controls",
+    id: "execution-type",
+    label: "Execution Type",
   },
   {
-    id: "preview-journey",
-    label: "Preview Journey",
+    id: "message-channel",
+    label: "Message & Channel",
   },
   {
-    id: "test",
-    label: "Test",
+    id: "frquency-controls",
+    label: "Frequency Controls",
+  },
+  {
+    id: "exit-conditions",
+    label: "Exit Conditions",
+  },
+  {
+    id: "conversions",
+    label: "Conversion",
+  },
+  {
+    id: "preview-test",
+    label: "Preview & Test",
   },
   {
     id: "review-activate",
@@ -178,25 +198,31 @@ export function TransactionBehaviourBuilder() {
           onStepChange={setCurrentStep}
         />
 
-        <section className="overflow-hidden rounded-xl border bg-background">
+        <section className="overflow-hidden rounded-xl border bg-background flex flex-col">
           <StepHeader currentStep={currentStep} steps={steps} />
 
-          <div className="p-5 md:p-7">
+          <div className="p-5 md:p-7 flex-1">
             {currentStep === 0 && <BasicInformationStep />}
 
             {currentStep === 1 && <CustomerAudienceStep />}
 
             {currentStep === 2 && <TransactionBehaviourRulesStep />}
 
-            {/*{currentStep === 3 && <JourneyStep />}
+            {currentStep === 3 && <PreviewQualifiedAudienceStep />}
 
-            {currentStep === 4 && <CommunicationControlsStep />}
+            {currentStep === 4 && <ExecutionTypeStep />}
 
-            {currentStep === 5 && <PreviewStep />}
+            {currentStep === 5 && <MessageChannelStep />}
 
-            {currentStep === 6 && <TestStep />}
+            {currentStep === 6 && <FrequencyControlsStep />}
 
-            {currentStep === 7 && <ReviewActivateStep />} */}
+            {currentStep === 7 && <ExitConditionStep />}
+
+            {currentStep === 8 && <ConversionStep />}
+
+            {currentStep === 9 && <PreviewTestStep />}
+
+            {currentStep === 10 && <ReviewActivateStep />}
           </div>
 
           <StepActions
@@ -261,10 +287,6 @@ export function TransactionBehaviourBuilder() {
       <AlertDialog open={approvalOpen} onOpenChange={setApprovalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Send className="size-5" />
-            </div>
-
             <AlertDialogTitle>Submit engagement for approval?</AlertDialogTitle>
 
             <AlertDialogDescription>
@@ -272,21 +294,6 @@ export function TransactionBehaviourBuilder() {
               It will not become active until it has been approved.
             </AlertDialogDescription>
           </AlertDialogHeader>
-
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-
-              <div>
-                <p className="text-sm font-medium">Ready for approval</p>
-
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  The current engagement configuration will be submitted for
-                  review.
-                </p>
-              </div>
-            </div>
-          </div>
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSubmitting}>

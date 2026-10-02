@@ -10,10 +10,10 @@ import {
   type TransactionFieldConfig,
 } from "../steps/data/behaviour-rule-data";
 
-import {
-  TransactionRuleBlock,
-  type TransactionRuleGroup,
-} from "./transaction-rule-block";
+import { TransactionRuleBlock } from "./transaction-rule-block";
+
+import type { TransactionRuleGroup } from "../steps/data/transaction-rule-types";
+
 type TransactionBehaviourRulesProps = {
   activities: string[];
 
@@ -36,6 +36,8 @@ type TransactionBehaviourRulesProps = {
   onAddAndBlock: () => void;
 
   onRemoveBlock: (blockId: string) => void;
+
+  required?: boolean;
 };
 
 export function TransactionBehaviourRules({
@@ -48,6 +50,7 @@ export function TransactionBehaviourRules({
   onRemoveCondition,
   onAddAndBlock,
   onRemoveBlock,
+  required = true,
 }: TransactionBehaviourRulesProps) {
   return (
     <div className="space-y-6">
@@ -66,7 +69,7 @@ export function TransactionBehaviourRules({
               onActivitiesChange(nextValue);
             }}
             placeholder="Select customer activity"
-            required
+            required={required}
           />
         </div>
       </section>

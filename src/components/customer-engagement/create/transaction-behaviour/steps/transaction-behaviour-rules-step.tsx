@@ -6,9 +6,10 @@ import { getAvailableFields } from "../steps/data/behaviour-rule-data";
 
 import { TransactionBehaviourRules } from "../components/transaction-behaviour-rules";
 
-import { type TransactionRuleGroup } from "../components/transaction-rule-block";
-
-import type { TransactionRule } from "../components/transaction-rule-row";
+import type {
+  TransactionRule,
+  TransactionRuleGroup,
+} from "../steps/data/transaction-rule-types";
 
 function createRule(): TransactionRule {
   return {
@@ -28,7 +29,7 @@ function createRule(): TransactionRule {
   };
 }
 
-function createRuleGroup(): TransactionRuleGroup {
+export function createRuleGroup(): TransactionRuleGroup {
   return {
     id: crypto.randomUUID(),
 
