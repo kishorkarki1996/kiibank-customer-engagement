@@ -13,11 +13,12 @@ import {
   TemplatePreview,
   type TemplateVariant,
 } from "@/components/customer-engagement/create/shared/template-preview";
+import ConditionPreviewBlock from "../../shared/condition-preview-block";
 
 type PreviewChannel = TemplateVariant;
 
 const configuration = {
-  name: "Dormant GBP→XAF Customers",
+  engagementName: "Dormant GBP→XAF Customers",
 
   category: "Transaction Behaviour",
 
@@ -30,6 +31,7 @@ const configuration = {
 
   execution: "Daily evaluation",
 
+  message: "Transaction Activity Reminder",
   channels: ["push", "whatsapp"] as PreviewChannel[],
 
   frequency: "Maximum once every 30 days",
@@ -111,7 +113,7 @@ export function PreviewTestStep() {
       {/* Heading */}
 
       <div>
-        <h3 className="text-lg font-semibold">{configuration.name}</h3>
+        {/* <h3 className="text-lg font-semibold">{configuration.engagementName}</h3> */}
 
         <p className="mt-1 text-sm text-muted-foreground">
           Review the complete engagement configuration and test the message
@@ -122,6 +124,10 @@ export function PreviewTestStep() {
       {/* Configuration Summary */}
 
       <section className="overflow-hidden rounded-xl border bg-background">
+        <ConfigurationRow
+          label="Engagement Name"
+          value={configuration.engagementName}
+        />
         <ConfigurationRow label="Category" value={configuration.category} />
 
         <ConfigurationRow
@@ -129,11 +135,12 @@ export function PreviewTestStep() {
           value={configuration.baseAudience}
         />
 
-        <ConfigurationRow label="Behaviour">
-          <ConditionList conditions={configuration.behaviour} />
+        <ConfigurationRow label="Behaviour & Rules">
+          <ConditionPreviewBlock />
         </ConfigurationRow>
 
         <ConfigurationRow label="Execution" value={configuration.execution} />
+        <ConfigurationRow label="Message" value={configuration.message} />
 
         <ConfigurationRow label="Channel">
           <ChannelFlow channels={configuration.channels} />
