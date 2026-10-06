@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { EngagementStatus } from "../(dashboard)/engagements/onboarding-lifecycle/onboarding-lifecycle.types";
+import { EngagementStatus } from "../(dashboard)/onboarding-lifecycle/onboarding-lifecycle.types";
 
 type EngagementStatusBadgeProps = {
   status: EngagementStatus;

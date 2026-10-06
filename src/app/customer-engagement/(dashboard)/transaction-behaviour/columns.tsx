@@ -2,34 +2,39 @@
 
 import { tableFeatures, type ColumnDef } from "@tanstack/react-table";
 
-import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
+import type { TransactionBehaviourEngagement } from "./transaction-behaviour.types";
 import { dataTableFeatures } from "@/app/customer-engagement/components/data-table/data-table.features";
 import { EngagementStatusBadge } from "@/app/customer-engagement/components/engagement-status-badge";
 import { EngagementPriorityBadge } from "@/app/customer-engagement/components/engagement-priority-badge";
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { Button } from "@/components/ui/button";
-import { OnboardingLifecycleActions } from "./onboarding-lifecycle-actions";
+import { TransactionBehaviourActions } from "./transaction-behaviour-actions";
 import { Eye } from "lucide-react";
 type GetColumnsProps = {
-  onView: (engagement: OnboardingLifecycleEngagement) => void;
+  onView: (engagement: TransactionBehaviourEngagement) => void;
 
-  onEdit: (engagement: OnboardingLifecycleEngagement) => void;
+  onEdit: (engagement: TransactionBehaviourEngagement) => void;
 
   onAction: (
-    engagement: OnboardingLifecycleEngagement,
+    engagement: TransactionBehaviourEngagement,
     action: EngagementAction,
   ) => void;
 };
-export function getOnboardingLifecycleColumns({
+export function getTransactionBehaviourColumns({
   onView,
   onEdit,
   onAction,
 }: GetColumnsProps): ColumnDef<
   typeof dataTableFeatures,
-  OnboardingLifecycleEngagement,
+  TransactionBehaviourEngagement,
   unknown
 >[] {
   return [
+    {
+      id: "sn",
+      header: "SN.",
+      cell: ({ row }) => row.index + 1,
+    },
     {
       accessorKey: "engagementId",
       header: "Engagement ID",
@@ -97,7 +102,7 @@ export function getOnboardingLifecycleColumns({
       id: "actions",
       header: "Action",
       cell: ({ row }) => (
-        <OnboardingLifecycleActions
+        <TransactionBehaviourActions
           engagement={row.original}
           onEdit={onEdit}
           onAction={onAction}

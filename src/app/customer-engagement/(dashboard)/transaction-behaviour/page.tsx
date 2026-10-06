@@ -1,17 +1,7 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  Megaphone,
-  MousePointerClick,
-  Plus,
-} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { EngagementTable } from "@/components/engagement-table";
-import TransactionBehaviourPage from "@/app/customer-engagement/create/transaction-behaviour/page";
 import { TransactionBehaviourTable } from "./transaction-behaviour-table";
 
 export default function OnboardingLifecyclePage() {

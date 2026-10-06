@@ -22,11 +22,11 @@ const data = {
       items: [
         {
           title: "Onboarding & Lifecycle",
-          url: "/customer-engagement/engagements/onboarding-lifecycle",
+          url: "/customer-engagement/onboarding-lifecycle",
         },
         {
           title: "Transaction Behaviour",
-          url: "/customer-engagement/engagements/transaction-behaviour",
+          url: "/customer-engagement/transaction-behaviour",
         },
         // {
         //   title: "Marketing & Rewards",
