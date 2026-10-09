@@ -88,48 +88,40 @@ export function OnboardingLifecycleActions({
       <DropdownMenuContent align="end" className="w-48">
         {canEdit(engagement.status) && (
           <DropdownMenuItem onClick={() => onEdit(engagement)}>
-            <Edit className="size-4" />
             Edit
           </DropdownMenuItem>
         )}
 
         {canApprove(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "approve")}>
-            <Check className="size-4" />
             Approve
           </DropdownMenuItem>
         )}
 
         {canActivate(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
-            <Play className="size-4" />
             Activate
           </DropdownMenuItem>
         )}
 
         {canPause(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "pause")}>
-            <Pause className="size-4" />
             Pause
           </DropdownMenuItem>
         )}
 
         {canResume(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "resume")}>
-            <Play className="size-4" />
             Resume
           </DropdownMenuItem>
         )}
 
         {canCancel(engagement.status) && (
           <>
-            <DropdownMenuSeparator />
-
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => onAction(engagement, "cancel")}
             >
-              <X className="size-4" />
               Cancel
             </DropdownMenuItem>
           </>
@@ -140,7 +132,6 @@ export function OnboardingLifecycleActions({
             className="text-destructive focus:text-destructive"
             onClick={() => onAction(engagement, "delete")}
           >
-            <Trash2 className="size-4" />
             Delete
           </DropdownMenuItem>
         )}

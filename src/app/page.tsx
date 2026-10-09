@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  redirect("/customer-engagement/engagements/onboarding-lifecycle");
+  redirect("/customer-engagement/onboarding-lifecycle");
 }

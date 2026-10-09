@@ -24,6 +24,10 @@ export function EngagementSummaryDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Engagement Summary</DialogTitle>
+
+          <DialogDescription>
+            Read-only summary of the engagement.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">

@@ -67,8 +67,8 @@ const data = {
     },
 
     {
-      title: "Engagment Audit Logs",
-      url: "/customer-engagement/engagement-audit-logs",
+      title: "Activity Audit Log",
+      url: "/customer-engagement/activity-audit-log",
       icon: Logs,
     },
   ],

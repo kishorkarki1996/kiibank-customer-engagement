@@ -20,22 +20,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import type {
-  EngagementStatus,
-  TransactionBehaviourEngagement,
-} from "./transaction-behaviour.types";
+  ArchivedEngagementStatus,
+  ArchivedEngagement,
+} from "./archived-engagements.types";
+import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 
-type TransactionBehaviourActionsProps = {
-  engagement: TransactionBehaviourEngagement;
-  onEdit: (engagement: TransactionBehaviourEngagement) => void;
-  onAction: (
-    engagement: TransactionBehaviourEngagement,
-    action: EngagementAction,
-  ) => void;
+type ArchivedEngagementsActionsProps = {
+  engagement: ArchivedEngagement;
+  onEdit: (engagement: ArchivedEngagement) => void;
+  onAction: (engagement: ArchivedEngagement, action: EngagementAction) => void;
 };
 
-function canEdit(status: EngagementStatus) {
+function canEdit(status: ArchivedEngagementStatus) {
   return ![
     "Scheduled",
     "Active",
@@ -46,35 +43,35 @@ function canEdit(status: EngagementStatus) {
   ].includes(status);
 }
 
-function canApprove(status: EngagementStatus) {
-  return status === "Pending Approval";
-}
+// function canApprove(status: ArchivedEngagementStatus) {
+//   return status === "Pending Approval";
+// }
 
-function canActivate(status: EngagementStatus) {
-  return status === "Draft";
-}
+// function canActivate(status: EngagementStatus) {
+//   return status === "Draft";
+// }
 
-function canPause(status: EngagementStatus) {
-  return status === "Scheduled" || status === "Active";
-}
+// function canPause(status: EngagementStatus) {
+//   return status === "Scheduled" || status === "Active";
+// }
 
-function canResume(status: EngagementStatus) {
-  return status === "Paused";
-}
+// function canResume(status: EngagementStatus) {
+//   return status === "Paused";
+// }
 
-function canCancel(status: EngagementStatus) {
-  return !["Completed", "Expired", "Canceled"].includes(status);
-}
+// function canCancel(status: EngagementStatus) {
+//   return !["Completed", "Expired", "Canceled"].includes(status);
+// }
 
-function canDelete(status: EngagementStatus) {
-  return status === "Draft" || status === "Pending Approval";
-}
+// function canDelete(status: EngagementStatus) {
+//   return status === "Draft" || status === "Pending Approval";
+// }
 
-export function TransactionBehaviourActions({
+export function ArchivedEngagementsActions({
   engagement,
   onEdit,
   onAction,
-}: TransactionBehaviourActionsProps) {
+}: ArchivedEngagementsActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -88,40 +85,48 @@ export function TransactionBehaviourActions({
       <DropdownMenuContent align="end" className="w-48">
         {canEdit(engagement.status) && (
           <DropdownMenuItem onClick={() => onEdit(engagement)}>
+            <Edit className="size-4" />
             Edit
           </DropdownMenuItem>
         )}
 
-        {canApprove(engagement.status) && (
+        {/* {canApprove(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "approve")}>
+            <Check className="size-4" />
             Approve
           </DropdownMenuItem>
         )}
 
         {canActivate(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
+            <Play className="size-4" />
             Activate
           </DropdownMenuItem>
         )}
 
         {canPause(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "pause")}>
+            <Pause className="size-4" />
             Pause
           </DropdownMenuItem>
         )}
 
         {canResume(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "resume")}>
+            <Play className="size-4" />
             Resume
           </DropdownMenuItem>
         )}
 
         {canCancel(engagement.status) && (
           <>
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => onAction(engagement, "cancel")}
             >
+              <X className="size-4" />
               Cancel
             </DropdownMenuItem>
           </>
@@ -132,9 +137,10 @@ export function TransactionBehaviourActions({
             className="text-destructive focus:text-destructive"
             onClick={() => onAction(engagement, "delete")}
           >
+            <Trash2 className="size-4" />
             Delete
           </DropdownMenuItem>
-        )}
+        )} */}
       </DropdownMenuContent>
     </DropdownMenu>
   );
