@@ -32,6 +32,7 @@ import { ExitConditionStep } from "./steps/exit-condition-step";
 import { ConversionStep } from "./steps/conversion-step";
 import { PreviewTestStep } from "./steps/preview-test-step";
 import { ReviewActivateStep } from "./steps/review-activate-step";
+import { useRouter } from "next/navigation";
 
 // import { AudienceStep } from "./steps/audience";
 // import { EntryTriggerStep } from "./steps/entry-trigger";
@@ -89,6 +90,7 @@ const steps = [
 ];
 
 export function TransactionBehaviourBuilder() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -343,6 +345,7 @@ export function TransactionBehaviourBuilder() {
               className="mt-6"
               onClick={() => {
                 setActivationSuccessOpen(false);
+                router.push("/customer-engagement/transaction-behaviour");
 
                 /**
                  * TODO:
@@ -391,6 +394,7 @@ export function TransactionBehaviourBuilder() {
               className="mt-6"
               onClick={() => {
                 setApprovalSuccessOpen(false);
+                router.push("/customer-engagement/transaction-behaviour");
 
                 /**
                  * TODO:

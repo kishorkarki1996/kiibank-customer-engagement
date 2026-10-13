@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { EngagementPriority } from "../(dashboard)/onboarding-lifecycle/onboarding-lifecycle.types";
+import { EngagementPriority } from "@/app/customer-engagement/components/engagement.type";
 
 type EngagementPriorityBadgeProps = {
   priority: EngagementPriority;

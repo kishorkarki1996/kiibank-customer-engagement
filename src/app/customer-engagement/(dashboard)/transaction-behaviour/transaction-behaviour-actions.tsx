@@ -1,17 +1,8 @@
 "use client";
 
-import {
-  Check,
-  Edit,
-  MoreHorizontal,
-  Pause,
-  Play,
-  Trash2,
-  X,
-} from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,11 +11,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import type {
+  EngagementAction,
   EngagementStatus,
-  TransactionBehaviourEngagement,
-} from "./transaction-behaviour.types";
+} from "@/app/customer-engagement/components/engagement.type";
+
+import type { TransactionBehaviourEngagement } from "./transaction-behaviour.types";
 
 type TransactionBehaviourActionsProps = {
   engagement: TransactionBehaviourEngagement;
@@ -36,22 +28,19 @@ type TransactionBehaviourActionsProps = {
 };
 
 function canEdit(status: EngagementStatus) {
-  return ![
-    "Scheduled",
-    "Active",
-    "Paused",
-    "Completed",
-    "Expired",
-    "Canceled",
-  ].includes(status);
+  return status === "Draft";
 }
 
 function canApprove(status: EngagementStatus) {
   return status === "Pending Approval";
 }
 
-function canActivate(status: EngagementStatus) {
-  return status === "Draft";
+function canReject(status: EngagementStatus) {
+  return status === "Pending Approval";
+}
+
+function canWithdraw(status: EngagementStatus) {
+  return status === "Pending Approval";
 }
 
 function canPause(status: EngagementStatus) {
@@ -63,11 +52,15 @@ function canResume(status: EngagementStatus) {
 }
 
 function canCancel(status: EngagementStatus) {
-  return !["Completed", "Expired", "Canceled"].includes(status);
+  return status === "Scheduled" || status === "Active" || status === "Paused";
 }
 
 function canDelete(status: EngagementStatus) {
-  return status === "Draft" || status === "Pending Approval";
+  return status === "Draft";
+}
+
+function canArchive(status: EngagementStatus) {
+  return status === "Canceled";
 }
 
 export function TransactionBehaviourActions({
@@ -80,12 +73,11 @@ export function TransactionBehaviourActions({
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="size-8">
           <MoreHorizontal className="size-4" />
-
           <span className="sr-only">Open actions</span>
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
         {canEdit(engagement.status) && (
           <DropdownMenuItem onClick={() => onEdit(engagement)}>
             Edit
@@ -98,9 +90,15 @@ export function TransactionBehaviourActions({
           </DropdownMenuItem>
         )}
 
-        {canActivate(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
-            Activate
+        {canReject(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "reject")}>
+            Reject
+          </DropdownMenuItem>
+        )}
+
+        {canWithdraw(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "withdraw")}>
+            Withdraw
           </DropdownMenuItem>
         )}
 
@@ -116,15 +114,23 @@ export function TransactionBehaviourActions({
           </DropdownMenuItem>
         )}
 
+        {canArchive(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "archive")}>
+            Archive
+          </DropdownMenuItem>
+        )}
+
+        {(canCancel(engagement.status) || canDelete(engagement.status)) && (
+          <DropdownMenuSeparator />
+        )}
+
         {canCancel(engagement.status) && (
-          <>
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => onAction(engagement, "cancel")}
-            >
-              Cancel
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => onAction(engagement, "cancel")}
+          >
+            Cancel
+          </DropdownMenuItem>
         )}
 
         {canDelete(engagement.status) && (

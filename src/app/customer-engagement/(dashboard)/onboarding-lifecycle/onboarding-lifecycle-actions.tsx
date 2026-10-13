@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Check,
-  Edit,
-  MoreHorizontal,
-  Pause,
-  Play,
-  Trash2,
-  X,
-} from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -20,11 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
+
 import type {
+  EngagementAction,
   EngagementStatus,
-  OnboardingLifecycleEngagement,
-} from "./onboarding-lifecycle.types";
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
+} from "@/app/customer-engagement/components/engagement.type";
 
 type OnboardingLifecycleActionsProps = {
   engagement: OnboardingLifecycleEngagement;
@@ -36,26 +29,27 @@ type OnboardingLifecycleActionsProps = {
 };
 
 function canEdit(status: EngagementStatus) {
-  return ![
-    "Scheduled",
-    "Active",
-    "Paused",
-    "Completed",
-    "Expired",
-    "Canceled",
-  ].includes(status);
+  return status === "Draft";
 }
+
+// function canSubmit(status: EngagementStatus) {
+//   return status === "Draft";
+// }
 
 function canApprove(status: EngagementStatus) {
   return status === "Pending Approval";
 }
 
-function canActivate(status: EngagementStatus) {
-  return status === "Draft";
+function canReject(status: EngagementStatus) {
+  return status === "Pending Approval";
+}
+
+function canWithdraw(status: EngagementStatus) {
+  return status === "Pending Approval";
 }
 
 function canPause(status: EngagementStatus) {
-  return status === "Scheduled" || status === "Active";
+  return status === "Active" || status === "Scheduled";
 }
 
 function canResume(status: EngagementStatus) {
@@ -63,11 +57,15 @@ function canResume(status: EngagementStatus) {
 }
 
 function canCancel(status: EngagementStatus) {
-  return !["Completed", "Expired", "Canceled"].includes(status);
+  return status === "Scheduled" || status === "Active" || status === "Paused";
 }
 
 function canDelete(status: EngagementStatus) {
-  return status === "Draft" || status === "Pending Approval";
+  return status === "Draft";
+}
+
+function canArchive(status: EngagementStatus) {
+  return status === "Canceled";
 }
 
 export function OnboardingLifecycleActions({
@@ -85,12 +83,18 @@ export function OnboardingLifecycleActions({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
         {canEdit(engagement.status) && (
           <DropdownMenuItem onClick={() => onEdit(engagement)}>
             Edit
           </DropdownMenuItem>
         )}
+
+        {/* {canSubmit(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "submit")}>
+            Submit for Approval
+          </DropdownMenuItem>
+        )} */}
 
         {canApprove(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "approve")}>
@@ -98,9 +102,15 @@ export function OnboardingLifecycleActions({
           </DropdownMenuItem>
         )}
 
-        {canActivate(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
-            Activate
+        {canReject(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "reject")}>
+            Reject
+          </DropdownMenuItem>
+        )}
+
+        {canWithdraw(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "withdraw")}>
+            Withdraw
           </DropdownMenuItem>
         )}
 
@@ -116,15 +126,23 @@ export function OnboardingLifecycleActions({
           </DropdownMenuItem>
         )}
 
+        {canArchive(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "archive")}>
+            Archive
+          </DropdownMenuItem>
+        )}
+
+        {(canCancel(engagement.status) || canDelete(engagement.status)) && (
+          <DropdownMenuSeparator />
+        )}
+
         {canCancel(engagement.status) && (
-          <>
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={() => onAction(engagement, "cancel")}
-            >
-              Cancel
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => onAction(engagement, "cancel")}
+          >
+            Cancel
+          </DropdownMenuItem>
         )}
 
         {canDelete(engagement.status) && (

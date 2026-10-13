@@ -1,7 +1,21 @@
+export type EngagementStatus =
+  | "Active"
+  | "Draft"
+  | "Scheduled"
+  | "Paused"
+  | "Pending Approval"
+  | "Canceled";
+
+export type EngagementPriority = "Critical" | "High" | "Medium" | "Low";
+
 export type EngagementAction =
+  | "submit"
   | "approve"
-  | "activate"
+  | "reject"
+  | "withdraw"
   | "pause"
   | "resume"
   | "cancel"
-  | "delete";
+  | "delete"
+  | "archive";
+// | "activate";

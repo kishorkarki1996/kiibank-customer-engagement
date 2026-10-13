@@ -324,9 +324,7 @@ export function OnboardingBuilder() {
               className="mt-6"
               onClick={() => {
                 setActivationSuccessOpen(false);
-                router.push(
-                  "/customer-engagement/engagements/onboarding-lifecycle",
-                );
+                router.push("/customer-engagement/onboarding-lifecycle");
               }}
             >
               View Engagement
@@ -361,9 +359,7 @@ export function OnboardingBuilder() {
               className="mt-6"
               onClick={() => {
                 setApprovalSuccessOpen(false);
-                router.push(
-                  "/customer-engagement/engagements/onboarding-lifecycle",
-                );
+                router.push("/customer-engagement/onboarding-lifecycle");
               }}
             >
               View Engagement

@@ -1,18 +1,7 @@
-export type EngagementStatus =
-  | "Active"
-  | "Draft"
-  | "Scheduled"
-  | "Paused"
-  | "Pending Approval"
-  | "Completed"
-  | "Expired"
-  | "Canceled";
-
-export type EngagementPriority =
-  | "Critical"
-  | "High"
-  | "Medium"
-  | "Low";
+import {
+  EngagementPriority,
+  EngagementStatus,
+} from "../../components/engagement.type";
 
 export type OnboardingLifecycleEngagement = {
   id: number;
