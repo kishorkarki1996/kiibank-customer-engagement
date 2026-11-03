@@ -44,9 +44,9 @@ function canReject(status: EngagementStatus) {
   return status === "Pending Approval";
 }
 
-function canWithdraw(status: EngagementStatus) {
-  return status === "Pending Approval";
-}
+// function canWithdraw(status: EngagementStatus) {
+//   return status === "Pending Approval";
+// }
 
 function canPause(status: EngagementStatus) {
   return status === "Active" || status === "Scheduled";
@@ -64,8 +64,16 @@ function canDelete(status: EngagementStatus) {
   return status === "Draft";
 }
 
-function canArchive(status: EngagementStatus) {
-  return status === "Canceled";
+function hasAvailableActions(status: EngagementStatus) {
+  return (
+    canEdit(status) ||
+    canApprove(status) ||
+    canReject(status) ||
+    canPause(status) ||
+    canResume(status) ||
+    canCancel(status) ||
+    canDelete(status)
+  );
 }
 
 export function OnboardingLifecycleActions({
@@ -76,7 +84,12 @@ export function OnboardingLifecycleActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          disabled={!hasAvailableActions(engagement.status)}
+        >
           <MoreHorizontal className="size-4" />
 
           <span className="sr-only">Open actions</span>
@@ -108,11 +121,11 @@ export function OnboardingLifecycleActions({
           </DropdownMenuItem>
         )}
 
-        {canWithdraw(engagement.status) && (
+        {/* {canWithdraw(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "withdraw")}>
             Withdraw
           </DropdownMenuItem>
-        )}
+        )} */}
 
         {canPause(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "pause")}>
@@ -123,12 +136,6 @@ export function OnboardingLifecycleActions({
         {canResume(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "resume")}>
             Resume
-          </DropdownMenuItem>
-        )}
-
-        {canArchive(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "archive")}>
-            Archive
           </DropdownMenuItem>
         )}
 

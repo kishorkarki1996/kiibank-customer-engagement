@@ -1,16 +1,11 @@
-export type EngagementHistoryStatus =
-  | "Archived"
-  | "Completed"
-  | "Expired"
-  | "Canceled";
-
-export type EngagementPriority = "Critical" | "High" | "Medium" | "Low";
+import { EngagementSummary } from "../../components/engagement-summary/engagement-summary-type";
 
 export type EngagementHistory = {
-  id: number;
-  dateTime: string;
+  id: string;
   name: string;
-  category: string;
+  category: EngagementSummary["category"];
+  dateTime: string;
   channel: string;
   deliveryResult: string;
+  summary: EngagementSummary;
 };

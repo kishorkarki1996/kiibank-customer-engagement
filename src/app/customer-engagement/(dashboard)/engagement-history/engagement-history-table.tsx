@@ -3,20 +3,23 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { EngagementSummaryDialog } from "./engagement-summary-dialog";
 import { EngagementHistory } from "./engagement-history.types";
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { getEngagementHistoryColumns } from "./columns";
 import { engagementHistoryData } from "./engagement-history.data";
 import { DataTable } from "@/app/customer-engagement/components/data-table/data-table";
+import { EngagementSummaryDialog } from "../../components/engagement-summary/engagement-summary-dialog";
+import { EngagementSummary } from "../../components/engagement-summary/engagement-summary-type";
 
 export function EngagementHistoryTable() {
   const router = useRouter();
 
-  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [selectedEngagement, setSelectedEngagement] =
+    useState<EngagementSummary | null>(null);
 
-  const handleView = () => {
-    setSummaryOpen(true);
+  const handleView = (engagement: EngagementHistory) => {
+    // Use the full summary stored on the history row
+    setSelectedEngagement(engagement.summary);
   };
 
   const handleEdit = (engagement: EngagementHistory) => {
@@ -49,8 +52,11 @@ export function EngagementHistoryTable() {
       />
 
       <EngagementSummaryDialog
-        open={summaryOpen}
-        onOpenChange={setSummaryOpen}
+        open={selectedEngagement !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEngagement(null);
+        }}
+        engagement={selectedEngagement}
       />
     </>
   );

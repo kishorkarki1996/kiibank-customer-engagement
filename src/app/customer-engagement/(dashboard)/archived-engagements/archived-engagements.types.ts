@@ -1,3 +1,4 @@
+import type { EngagementSummary } from "../../components/engagement-summary/engagement-summary-type";
 export type ArchivedEngagementStatus =
   | "Archived"
   | "Completed"
@@ -20,4 +21,5 @@ export type ArchivedEngagement = {
   nextExecution: string;
   lastExecution: string;
   lastUpdated: string;
+  summary: EngagementSummary;
 };

@@ -12,7 +12,8 @@ import { getTransactionBehaviourColumns } from "./columns";
 import { transactionBehaviourData } from "./transaction-behaviour.data";
 
 import type { TransactionBehaviourEngagement } from "./transaction-behaviour.types";
-import { EngagementSummaryDialog } from "./engagement-summary-dialog";
+import { transactionEngagement } from "../../components/engagement-summary/engagement-summary-data";
+import { EngagementSummaryDialog } from "../../components/engagement-summary/engagement-summary-dialog";
 
 export function TransactionBehaviourTable() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export function TransactionBehaviourTable() {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
 
   const handleView = (engagement: TransactionBehaviourEngagement) => {
-    console.log("View", engagement);
+    setSummaryOpen(true);
   };
 
   const handleEdit = (engagement: TransactionBehaviourEngagement) => {
@@ -78,6 +79,7 @@ export function TransactionBehaviourTable() {
       <EngagementSummaryDialog
         open={summaryOpen}
         onOpenChange={setSummaryOpen}
+        engagement={transactionEngagement}
       />
       <EngagementActionConfirmationDialog
         open={confirmationOpen}

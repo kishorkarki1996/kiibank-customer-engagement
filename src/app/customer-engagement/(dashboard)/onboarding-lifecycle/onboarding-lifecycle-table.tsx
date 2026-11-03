@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { EngagementSummaryDialog } from "./engagement-summary-dialog";
 import { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { getOnboardingLifecycleColumns } from "./columns";
 import { onboardingLifecycleData } from "./onboarding-lifecycle.data";
 import { DataTable } from "@/app/customer-engagement/components/data-table/data-table";
 import { EngagementActionConfirmationDialog } from "../../components/engagement-action-confirmation-dialog";
+import { onboardingEngagement } from "../../components/engagement-summary/engagement-summary-data";
+import { EngagementSummaryDialog } from "../../components/engagement-summary/engagement-summary-dialog";
 
 export function OnboardingLifecycleTable() {
   const router = useRouter();
@@ -77,6 +78,7 @@ export function OnboardingLifecycleTable() {
       <EngagementSummaryDialog
         open={summaryOpen}
         onOpenChange={setSummaryOpen}
+        engagement={onboardingEngagement}
       />
       <EngagementActionConfirmationDialog
         open={confirmationOpen}

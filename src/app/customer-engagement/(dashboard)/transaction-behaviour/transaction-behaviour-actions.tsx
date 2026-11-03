@@ -59,10 +59,6 @@ function canDelete(status: EngagementStatus) {
   return status === "Draft";
 }
 
-function canArchive(status: EngagementStatus) {
-  return status === "Canceled";
-}
-
 export function TransactionBehaviourActions({
   engagement,
   onEdit,
@@ -111,12 +107,6 @@ export function TransactionBehaviourActions({
         {canResume(engagement.status) && (
           <DropdownMenuItem onClick={() => onAction(engagement, "resume")}>
             Resume
-          </DropdownMenuItem>
-        )}
-
-        {canArchive(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "archive")}>
-            Archive
           </DropdownMenuItem>
         )}
 

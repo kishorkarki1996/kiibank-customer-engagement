@@ -1,63 +1,83 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type EngagementSummaryDialogProps = {
+type TransactionBehaviourSummaryDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+};
+
+const engagementSummary = {
+  name: "Dormant GBP→XAF Customers",
+  category: "Transaction Behaviour",
+  owner: "Customer Engagement Team",
+  audience: "UK / GBP + XAF / Active Customers",
+  conditions: "Previous GBP→XAF activity + 30-day inactivity",
+  execution: "Daily",
+  channels: ["Push Notification", "WhatsApp"],
+  frequency: "Once every 30 days/customer",
+  exitCondition: "Successful GBP→XAF transaction",
+  conversionWindow: "7 days",
 };
 
 export function EngagementSummaryDialog({
   open,
   onOpenChange,
-}: EngagementSummaryDialogProps) {
+}: TransactionBehaviourSummaryDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[80vh] overflow-hidden sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Engagement Summary</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div>
-            <div className="text-xs text-muted-foreground">Engagement Name</div>
+        <div className="overflow-y-auto">
+          <section className="overflow-hidden rounded-xl border bg-background">
+            <SummaryRow
+              label="Engagement Name"
+              value={engagementSummary.name}
+            />
 
-            <div className="text-sm font-medium">
-              New Customer Welcome Journey
-            </div>
-          </div>
+            <SummaryRow label="Category" value={engagementSummary.category} />
 
-          <div>
-            <div className="text-xs text-muted-foreground">Engagement ID</div>
+            <SummaryRow label="Owner" value={engagementSummary.owner} />
 
-            <div className="text-sm font-medium">ENG-2026-00124</div>
-          </div>
+            <SummaryRow label="Audience" value={engagementSummary.audience} />
 
-          <div>
-            <div className="text-xs text-muted-foreground">Status</div>
+            <SummaryRow
+              label="Conditions"
+              value={engagementSummary.conditions}
+            />
 
-            <div className="text-sm font-medium">Active</div>
-          </div>
+            <SummaryRow label="Execution" value={engagementSummary.execution} />
 
-          <div>
-            <div className="text-xs text-muted-foreground">Owner</div>
+            <SummaryRow label="Channel">
+              <ChannelFlow channels={engagementSummary.channels} />
+            </SummaryRow>
 
-            <div className="text-sm font-medium">John Kamau</div>
-          </div>
+            <SummaryRow label="Frequency" value={engagementSummary.frequency} />
 
-          <div>
-            <div className="text-xs text-muted-foreground">Priority</div>
+            <SummaryRow
+              label="Exit Condition"
+              value={engagementSummary.exitCondition}
+            />
 
-            <div className="text-sm font-medium">High</div>
-          </div>
+            <SummaryRow
+              label="Conversion Window"
+              value={engagementSummary.conversionWindow}
+              last
+            />
+          </section>
         </div>
 
         <DialogFooter>
@@ -67,5 +87,49 @@ export function EngagementSummaryDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  children,
+  last = false,
+}: {
+  label: string;
+  value?: string;
+  children?: React.ReactNode;
+  last?: boolean;
+}) {
+  return (
+    <div
+      className={`grid gap-2 px-5 py-4 md:grid-cols-[220px_minmax(0,1fr)] ${
+        last ? "" : "border-b"
+      }`}
+    >
+      <p className="text-sm font-medium text-muted-foreground">{label}</p>
+
+      <div className="min-w-0 text-sm font-medium">
+        {children ?? value ?? "-"}
+      </div>
+    </div>
+  );
+}
+
+function ChannelFlow({ channels }: { channels: string[] }) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {channels.map((channel, index) => (
+        <div key={`${channel}-${index}`} className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-background font-medium">
+            {channel}
+          </Badge>
+
+          {index < channels.length - 1 && (
+            <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }

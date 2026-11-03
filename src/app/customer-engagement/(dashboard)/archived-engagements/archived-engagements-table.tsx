@@ -3,23 +3,23 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { EngagementSummaryDialog } from "./engagement-summary-dialog";
-import {
-  ArchivedEngagement,
-  ArchivedEngagementStatus,
-} from "./archived-engagements.types";
+import { ArchivedEngagement } from "./archived-engagements.types";
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { getOnboardingLifecycleColumns } from "./columns";
 import { archivedEngagementsData } from "./archived-engagements.data";
 import { DataTable } from "@/app/customer-engagement/components/data-table/data-table";
 
+import { EngagementSummaryDialog } from "../../components/engagement-summary/engagement-summary-dialog";
+import type { EngagementSummary } from "../../components/engagement-summary/engagement-summary-type";
+
 export function ArchivedEngagementsTable() {
   const router = useRouter();
 
-  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [selectedEngagement, setSelectedEngagement] =
+    useState<EngagementSummary | null>(null);
 
-  const handleView = () => {
-    setSummaryOpen(true);
+  const handleView = (engagement: ArchivedEngagement) => {
+    setSelectedEngagement(engagement.summary);
   };
 
   const handleEdit = (engagement: ArchivedEngagement) => {
@@ -54,8 +54,13 @@ export function ArchivedEngagementsTable() {
       />
 
       <EngagementSummaryDialog
-        open={summaryOpen}
-        onOpenChange={setSummaryOpen}
+        open={selectedEngagement !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedEngagement(null);
+          }
+        }}
+        engagement={selectedEngagement}
       />
     </>
   );
