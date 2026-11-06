@@ -11,10 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import type {
-  EngagementAction,
-  EngagementStatus,
-} from "@/app/customer-engagement/components/engagement.type";
+import type { EngagementStatus } from "@/app/customer-engagement/components/engagement.type";
+import type { EngagementAction } from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
 
 import type { TransactionBehaviourEngagement } from "./transaction-behaviour.types";
 
@@ -28,19 +26,15 @@ type TransactionBehaviourActionsProps = {
 };
 
 function canEdit(status: EngagementStatus) {
-  return status === "Draft";
+  return status === "Draft" || status === "Pending Approval";
 }
 
 function canApprove(status: EngagementStatus) {
   return status === "Pending Approval";
 }
 
-function canReject(status: EngagementStatus) {
-  return status === "Pending Approval";
-}
-
-function canWithdraw(status: EngagementStatus) {
-  return status === "Pending Approval";
+function canActivate(status: EngagementStatus) {
+  return status === "Draft";
 }
 
 function canPause(status: EngagementStatus) {
@@ -52,11 +46,17 @@ function canResume(status: EngagementStatus) {
 }
 
 function canCancel(status: EngagementStatus) {
-  return status === "Scheduled" || status === "Active" || status === "Paused";
+  return (
+    status === "Draft" ||
+    status === "Pending Approval" ||
+    status === "Scheduled" ||
+    status === "Active" ||
+    status === "Paused"
+  );
 }
 
 function canDelete(status: EngagementStatus) {
-  return status === "Draft";
+  return status === "Draft" || status === "Pending Approval";
 }
 
 export function TransactionBehaviourActions({
@@ -86,15 +86,9 @@ export function TransactionBehaviourActions({
           </DropdownMenuItem>
         )}
 
-        {canReject(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "reject")}>
-            Reject
-          </DropdownMenuItem>
-        )}
-
-        {canWithdraw(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "withdraw")}>
-            Withdraw
+        {canActivate(engagement.status) && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
+            Activate
           </DropdownMenuItem>
         )}
 

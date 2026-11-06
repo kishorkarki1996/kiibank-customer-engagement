@@ -6,7 +6,6 @@ import type { EngagementHistory } from "./engagement-history.types";
 import { dataTableFeatures } from "@/app/customer-engagement/components/data-table/data-table.features";
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
 type GetColumnsProps = {
   onView: (engagement: EngagementHistory) => void;
 
@@ -52,12 +51,11 @@ export function getEngagementHistoryColumns({
       header: "View Summary",
       cell: ({ row }) => (
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
-          className="gap-2"
+          className="bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
           onClick={() => onView(row.original)}
         >
-          <Eye className="size-4" />
           View
         </Button>
       ),

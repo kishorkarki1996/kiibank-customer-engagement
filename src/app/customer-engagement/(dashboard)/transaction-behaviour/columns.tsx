@@ -6,10 +6,9 @@ import type { TransactionBehaviourEngagement } from "./transaction-behaviour.typ
 import { dataTableFeatures } from "@/app/customer-engagement/components/data-table/data-table.features";
 import { EngagementStatusBadge } from "@/app/customer-engagement/components/engagement-status-badge";
 import { EngagementPriorityBadge } from "@/app/customer-engagement/components/engagement-priority-badge";
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
+import type { EngagementAction } from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
 import { Button } from "@/components/ui/button";
 import { TransactionBehaviourActions } from "./transaction-behaviour-actions";
-import { Eye } from "lucide-react";
 type GetColumnsProps = {
   onView: (engagement: TransactionBehaviourEngagement) => void;
 
@@ -68,12 +67,11 @@ export function getTransactionBehaviourColumns({
       header: "View Summary",
       cell: ({ row }) => (
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
-          className="gap-2"
+          className="bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
           onClick={() => onView(row.original)}
         >
-          <Eye className="size-4" />
           View
         </Button>
       ),

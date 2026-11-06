@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Eye } from "lucide-react";
 
 import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
 import type { EngagementAction } from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
@@ -69,12 +68,11 @@ export function getOnboardingLifecycleColumns({
       header: "View Summary",
       cell: ({ row }) => (
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
-          className="gap-2"
+          className="bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
           onClick={() => onView(row.original)}
         >
-          <Eye className="size-4" />
           View
         </Button>
       ),

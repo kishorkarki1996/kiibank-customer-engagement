@@ -9,7 +9,6 @@ import { EngagementPriorityBadge } from "@/app/customer-engagement/components/en
 import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { Button } from "@/components/ui/button";
 import { ArchivedEngagementsActions } from "./archived-engagements-actions";
-import { Eye } from "lucide-react";
 type GetColumnsProps = {
   onView: (engagement: ArchivedEngagement) => void;
 
@@ -86,12 +85,11 @@ export function getOnboardingLifecycleColumns({
       header: "View Summary",
       cell: ({ row }) => (
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
-          className="gap-2"
+          className="bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
           onClick={() => onView(row.original)}
         >
-          <Eye className="size-4" />
           View
         </Button>
       ),

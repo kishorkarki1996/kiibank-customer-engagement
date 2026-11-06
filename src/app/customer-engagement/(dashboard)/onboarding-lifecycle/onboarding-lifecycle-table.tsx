@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
 import { getOnboardingLifecycleColumns } from "./columns";
@@ -26,6 +27,16 @@ type SelectedAction = {
   action: EngagementAction;
 };
 
+const actionSuccessMessages: Record<EngagementAction, string> = {
+  edit: "Engagement edit confirmed.",
+  approve: "Engagement approved successfully.",
+  activate: "Engagement activated successfully.",
+  pause: "Engagement paused successfully.",
+  resume: "Engagement resumed successfully.",
+  cancel: "Engagement canceled successfully.",
+  delete: "Engagement deleted successfully.",
+};
+
 export function OnboardingLifecycleTable() {
   const router = useRouter();
 
@@ -47,7 +58,7 @@ export function OnboardingLifecycleTable() {
 
   const handleEdit = (engagement: OnboardingLifecycleEngagement) => {
     router.push(
-      `/customer-engagement/create?engagementId=${engagement.engagementId}`,
+      `/customer-engagement/create/onboarding-and-lifecycle?engagementId=${engagement.engagementId}`,
     );
   };
 
@@ -118,6 +129,8 @@ export function OnboardingLifecycleTable() {
     });
 
     await handleExecuteAction(actionRequest);
+
+    toast.success(actionSuccessMessages[actionRequest.action]);
 
     setOtpOpen(false);
     setActionRequest(null);
