@@ -68,7 +68,7 @@ export function getTransactionBehaviourColumns({
       cell: ({ row }) => (
         <Button
           variant="secondary"
-          size="sm"
+          size="xs"
           className="bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
           onClick={() => onView(row.original)}
         >

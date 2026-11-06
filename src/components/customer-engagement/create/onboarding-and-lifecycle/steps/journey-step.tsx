@@ -1,23 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Clock3, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 
-import { AppMultiSelect } from "@/components/common/app-multi-select";
 import { AppSelect } from "@/components/common/app-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import {
   JourneyConditionBlock,
   JourneyMessageCondition,
 } from "@/components/customer-engagement/create/shared/journey-message-condition";
+import {
+  channelOptions,
+  DeliveryChannelTemplateFields,
+  DeliveryOrder,
+  FallbackDeliverySection,
+  type FallbackDelivery,
+} from "@/components/customer-engagement/create/shared/delivery-channel-template";
 
 type WaitUnit = "hours" | "days" | "weeks" | "months";
 
@@ -28,7 +29,7 @@ type JourneyStepItem = {
   waitUnit: WaitUnit;
   template: string;
   channel: string;
-  fallback: string[];
+  fallback: FallbackDelivery[];
   conditionMode: "always" | "conditional";
   conditionBlocks: JourneyConditionBlock[];
 };
@@ -62,52 +63,6 @@ const forcedDelayedActionOptions = [
   },
 ];
 
-const messageTemplateOptions = [
-  {
-    label: "Welcome to KiiBank",
-    value: "welcome-to-kiibank",
-  },
-  {
-    label: "What You Can Do With Your KiiBank Account",
-    value: "kiibank-account-features",
-  },
-  {
-    label: "Using Your GBP Account",
-    value: "using-gbp-account",
-  },
-  {
-    label: "Sending Money With KiiBank",
-    value: "sending-money",
-  },
-  {
-    label: "Discover More KiiBank Features",
-    value: "discover-more-features",
-  },
-];
-
-const channelOptions = [
-  {
-    label: "Push Notification",
-    value: "push",
-  },
-  {
-    label: "WhatsApp",
-    value: "whatsapp",
-  },
-  {
-    label: "Email",
-    value: "email",
-  },
-  {
-    label: "SMS",
-    value: "sms",
-  },
-  {
-    label: "In-App",
-    value: "in-app",
-  },
-];
-
 const waitUnitOptions = [
   {
     label: "Hours",
@@ -127,85 +82,6 @@ const waitUnitOptions = [
   },
 ];
 
-const templateContent: Record<string, string> = {
-  "welcome-to-kiibank": `
-    <div class="font-semibold">
-      Welcome to KiiBank
-    </div>
-
-    <p class="mt-2 text-sm text-muted-foreground">
-      Your KiiBank multi-currency account is ready.
-      Discover simple and secure ways to manage and
-      move your money.
-    </p>
-  `,
-
-  "kiibank-account-features": `
-    <div class="font-semibold">
-      What You Can Do With Your KiiBank Account
-    </div>
-
-    <p class="mt-2 text-sm text-muted-foreground">
-      Explore the features available to help you
-      manage your money across currencies.
-    </p>
-  `,
-
-  "using-gbp-account": `
-    <strong class="font-semibold">
-      Using Your GBP Account
-    </strong>
-
-    <p class="mt-2 text-sm text-muted-foreground">
-      Learn how to use your GBP account to receive
-      and manage money.
-    </p>
-  `,
-
-  "sending-money": `
-    <strong class="font-semibold">
-      Sending Money With KiiBank
-    </strong>
-
-    <p class="mt-2 text-sm text-muted-foreground">
-      Send money securely to your saved recipients
-      using KiiBank.
-    </p>
-  `,
-
-  "discover-more-features": `
-    <strong class="font-semibold">
-      Discover More KiiBank Features
-    </strong>
-
-    <p class="mt-2 text-sm text-muted-foreground">
-      Discover more ways to manage your money with
-      KiiBank.
-    </p>
-  `,
-};
-
-function getTemplateLabel(template: string) {
-  return (
-    messageTemplateOptions.find((option) => option.value === template)?.label ??
-    "Message Template"
-  );
-}
-
-function getChannelLabel(value: string) {
-  return (
-    channelOptions.find((option) => option.value === value)?.label ?? value
-  );
-}
-
-function getFallbackItems(selectedChannel: string) {
-  const selectedChannelLabel = getChannelLabel(selectedChannel);
-
-  return channelOptions
-    .map((option) => option.label)
-    .filter((label) => label !== selectedChannelLabel);
-}
-
 function isDelayedAction(action: string) {
   return action === "after-delay" || action === "delayed-notification";
 }
@@ -221,48 +97,6 @@ function formatWait(value: number, unit: WaitUnit) {
   const label = unitLabels[unit];
 
   return `${value} ${value === 1 ? label : `${label}s`}`;
-}
-
-function TemplatePreviewPopover({ template }: { template: string }) {
-  if (!template) {
-    return null;
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          View
-        </button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align="end"
-        side="bottom"
-        className="w-[420px] max-w-[calc(100vw-2rem)]"
-      >
-        <div className="space-y-3">
-          <div className="border-b pb-3">
-            <p className="font-semibold">Template preview</p>
-
-            <p className="mt-1 text-xs text-muted-foreground">
-              {getTemplateLabel(template)}
-            </p>
-          </div>
-
-          <div
-            className="prose prose-sm max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{
-              __html: templateContent[template] ?? "",
-            }}
-          />
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
 }
 
 function formatJourneyTiming(steps: JourneyStepItem[]) {
@@ -306,53 +140,6 @@ function formatJourneyTiming(steps: JourneyStepItem[]) {
   return `${parts.join(", ")} after signup`;
 }
 
-function ChannelOrder({
-  channel,
-  fallback,
-}: {
-  channel: string;
-  fallback: string[];
-}) {
-  if (!channel || fallback.length === 0) {
-    return null;
-  }
-
-  const primaryChannel = getChannelLabel(channel);
-
-  const channels = [primaryChannel, ...fallback];
-
-  return (
-    <div className="rounded-lg border bg-muted/30 px-4 py-4">
-      <p className="mt-1 text-sm text-foreground">
-        KiiBank will try each fallback channel in the order selected.
-      </p>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {channels.map((channelName, index) => (
-          <div
-            key={`${channelName}-${index}`}
-            className="flex items-center gap-2"
-          >
-            <div className="min-w-[120px] rounded-lg border bg-background px-3 py-2">
-              <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                {index === 0 ? "Primary" : `Fallback ${index}`}
-              </p>
-
-              <p className="mt-0.5 truncate text-sm font-medium">
-                {channelName}
-              </p>
-            </div>
-
-            {index < channels.length - 1 && (
-              <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export function JourneyStep() {
   const [conditionBlocks, setConditionBlocks] = useState<
     JourneyConditionBlock[]
@@ -370,7 +157,9 @@ export function JourneyStep() {
 
   const [initialChannel, setInitialChannel] = useState("");
 
-  const [initialFallback, setInitialFallback] = useState<string[]>([]);
+  const [initialFallback, setInitialFallback] = useState<FallbackDelivery[]>(
+    [],
+  );
 
   const [journeySteps, setJourneySteps] = useState<JourneyStepItem[]>([]);
 
@@ -447,11 +236,8 @@ export function JourneyStep() {
 
   const handleInitialChannelChange = (value: string) => {
     setInitialChannel(value);
-
-    const selectedLabel = getChannelLabel(value);
-
-    setInitialFallback((fallbackChannels) =>
-      fallbackChannels.filter((channel) => channel !== selectedLabel),
+    setInitialFallback((deliveries) =>
+      deliveries.filter((delivery) => delivery.channel !== value),
     );
   };
 
@@ -502,12 +288,9 @@ export function JourneyStep() {
   };
 
   const handleJourneyChannelChange = (step: JourneyStepItem, value: string) => {
-    const selectedLabel = getChannelLabel(value);
-
     updateJourneyStep(step.id, {
       channel: value,
-
-      fallback: step.fallback.filter((channel) => channel !== selectedLabel),
+      fallback: step.fallback.filter((delivery) => delivery.channel !== value),
     });
   };
 
@@ -620,50 +403,35 @@ export function JourneyStep() {
             <p className="mt-1 text-sm font-medium">{initialJourneyTiming}</p>
           </div>
 
-          {/* Message / Channel / Fallback */}
-
-          <div className="grid gap-5 md:grid-cols-3">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>
-                  Message Template <span className="text-destructive">*</span>
-                </Label>
-
-                {initialTemplate && (
-                  <TemplatePreviewPopover template={initialTemplate} />
-                )}
-              </div>
-
-              <AppSelect
-                value={initialTemplate}
-                onValueChange={setInitialTemplate}
-                placeholder="Select Template"
-                options={messageTemplateOptions}
+          <div>
+            <p className="mt-1 mb-2 text-sm text-muted-foreground">
+              Select the message template and delivery channels for this
+              engagement.
+            </p>
+            <section className="space-y-3 bg-muted/30 p-4 rounded-lg border">
+              <p className="text-sm font-semibold">Primary Delivery</p>
+              <DeliveryChannelTemplateFields
+                channelLabel="Channel"
+                channel={initialChannel}
+                channelOptions={channelOptions}
+                onChannelChange={handleInitialChannelChange}
+                template={initialTemplate}
+                onTemplateChange={setInitialTemplate}
               />
-            </div>
-
-            <AppSelect
-              label="Channel"
-              value={initialChannel}
-              onValueChange={handleInitialChannelChange}
-              placeholder="Select channel"
-              options={channelOptions}
-              required
-            />
-
-            <AppMultiSelect
-              label="Fallback Channel"
-              items={getFallbackItems(initialChannel)}
-              value={initialFallback}
-              setValue={setInitialFallback}
-              placeholder="Select fallback channels"
-            />
+            </section>
           </div>
 
-          {/* Channel Order */}
+          <FallbackDeliverySection
+            primaryChannel={initialChannel}
+            deliveries={initialFallback}
+            onChange={setInitialFallback}
+          />
 
-          {initialFallback.length > 0 && (
-            <ChannelOrder channel={initialChannel} fallback={initialFallback} />
+          {initialFallback.some((delivery) => delivery.channel) && (
+            <DeliveryOrder
+              primaryChannel={initialChannel}
+              fallbackDeliveries={initialFallback}
+            />
           )}
 
           {/* Message Condition */}
@@ -680,8 +448,6 @@ export function JourneyStep() {
       {/* Subsequent Journey Steps */}
 
       {journeySteps.map((step, index) => {
-        const fallbackItems = getFallbackItems(step.channel);
-
         const sendLocked = isSendLocked(index);
 
         /*
@@ -780,8 +546,6 @@ export function JourneyStep() {
 
               <div className="rounded-lg border bg-muted/30 px-4 py-3">
                 <div className="flex items-start gap-2">
-                  <Clock3 className="mt-0.5 size-4 text-muted-foreground" />
-
                   <div>
                     <p className="text-xs text-muted-foreground">
                       Journey timing
@@ -794,66 +558,35 @@ export function JourneyStep() {
                 </div>
               </div>
 
-              {/* Message / Channel / Fallback */}
-
-              <div className="grid gap-5 md:grid-cols-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>
-                      Message Template{" "}
-                      <span className="text-destructive">*</span>
-                    </Label>
-
-                    {step.template && (
-                      <TemplatePreviewPopover template={step.template} />
-                    )}
-                  </div>
-
-                  <AppSelect
-                    value={step.template}
-                    onValueChange={(value) =>
-                      updateJourneyStep(step.id, {
-                        template: value,
-                      })
-                    }
-                    placeholder="Select message template"
-                    options={messageTemplateOptions}
-                  />
-                </div>
-
-                <AppSelect
-                  label="Channel"
-                  value={step.channel}
-                  onValueChange={(value) =>
+              <section className="space-y-3 rounded-lg border bg-muted/30 p-4">
+                <p className="text-sm font-semibold">Primary Delivery</p>
+                <DeliveryChannelTemplateFields
+                  channelLabel="Channel"
+                  channel={step.channel}
+                  channelOptions={channelOptions}
+                  onChannelChange={(value) =>
                     handleJourneyChannelChange(step, value)
                   }
-                  placeholder="Select channel"
-                  options={channelOptions}
-                  required
+                  template={step.template}
+                  onTemplateChange={(template) =>
+                    updateJourneyStep(step.id, { template })
+                  }
                 />
+              </section>
 
-                <AppMultiSelect
-                  label="Fallback Channel"
-                  items={fallbackItems}
-                  value={step.fallback}
-                  setValue={(value) => {
-                    const nextValue =
-                      typeof value === "function"
-                        ? value(step.fallback)
-                        : value;
+              <FallbackDeliverySection
+                primaryChannel={step.channel}
+                deliveries={step.fallback}
+                onChange={(fallback) =>
+                  updateJourneyStep(step.id, { fallback })
+                }
+              />
 
-                    updateJourneyStep(step.id, {
-                      fallback: nextValue,
-                    });
-                  }}
-                  placeholder="Select fallback channels"
+              {step.fallback.some((delivery) => delivery.channel) && (
+                <DeliveryOrder
+                  primaryChannel={step.channel}
+                  fallbackDeliveries={step.fallback}
                 />
-              </div>
-
-              {/* Channel Order */}
-
-              {step.fallback.length > 0 && (
-                <ChannelOrder channel={step.channel} fallback={step.fallback} />
               )}
 
               {/* Message Condition */}
