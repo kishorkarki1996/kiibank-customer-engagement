@@ -3,58 +3,130 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
+import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
 import { getOnboardingLifecycleColumns } from "./columns";
 import { onboardingLifecycleData } from "./onboarding-lifecycle.data";
+
 import { DataTable } from "@/app/customer-engagement/components/data-table/data-table";
-import { EngagementActionConfirmationDialog } from "../../components/engagement-action-confirmation-dialog";
+
 import { onboardingEngagement } from "../../components/engagement-summary/engagement-summary-data";
 import { EngagementSummaryDialog } from "../../components/engagement-summary/engagement-summary-dialog";
+
+import { EngagementActionDialog } from "@/app/customer-engagement/components/engagement-actions/engagement-action-dialog";
+import { EngagementOtpDialog } from "@/app/customer-engagement/components/engagement-actions/engagement-otp-dialog";
+
+import type {
+  EngagementAction,
+  ActionRequest,
+  VerificationRequest,
+} from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
+
+type SelectedAction = {
+  engagement: OnboardingLifecycleEngagement;
+  action: EngagementAction;
+};
 
 export function OnboardingLifecycleTable() {
   const router = useRouter();
 
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [selectedEngagement, setSelectedEngagement] =
-    useState<OnboardingLifecycleEngagement | null>(null);
 
-  const [selectedAction, setSelectedAction] = useState<EngagementAction | null>(
+  const [selectedAction, setSelectedAction] = useState<SelectedAction | null>(
     null,
   );
 
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [actionRequest, setActionRequest] = useState<ActionRequest | null>(
+    null,
+  );
+
+  const [otpOpen, setOtpOpen] = useState(false);
 
   const handleView = () => {
     setSummaryOpen(true);
   };
 
   const handleEdit = (engagement: OnboardingLifecycleEngagement) => {
-    router.push(`/customer-engagement/create/onboarding-and-lifecycle`);
+    router.push(
+      `/customer-engagement/create?engagementId=${engagement.engagementId}`,
+    );
   };
 
   const handleAction = (
     engagement: OnboardingLifecycleEngagement,
     action: EngagementAction,
   ) => {
-    setSelectedEngagement(engagement);
-    setSelectedAction(action);
-    setConfirmationOpen(true);
+    setSelectedAction({
+      engagement,
+      action,
+    });
   };
 
-  const handleConfirmAction = () => {
-    if (!selectedEngagement || !selectedAction) {
+  /**
+   * User confirms the action in the first dialog.
+   *
+   * We close the confirmation dialog and open
+   * the separate authenticator OTP dialog.
+   */
+  const handleActionConfirmation = (request: ActionRequest) => {
+    setActionRequest(request);
+
+    setSelectedAction(null);
+
+    setOtpOpen(true);
+  };
+
+  const handleVerifyOtp = async (request: VerificationRequest) => {
+    console.log("OTP verification requested:", {
+      engagementId: request.engagementId,
+      action: request.action,
+      method: request.method,
+    });
+
+    // TODO:
+    // Integrate OTP verification API here.
+    //
+    // Do not log the OTP code.
+  };
+
+  const handleExecuteAction = async (request: ActionRequest) => {
+    console.log("Executing engagement action:", {
+      engagementId: request.engagementId,
+      action: request.action,
+      reason: request.reason,
+    });
+
+    // TODO:
+    // Integrate engagement action API here.
+    //
+    // Backend must verify:
+    // - user permission
+    // - OTP verification
+    // - current engagement status
+    // - allowed status transition
+  };
+
+  const handleOtpConfirm = async (otp: string) => {
+    if (!actionRequest) {
       return;
     }
 
-    console.log("Confirmed action:", selectedAction, selectedEngagement);
+    await handleVerifyOtp({
+      engagementId: actionRequest.engagementId,
+      action: actionRequest.action,
+      method: "authenticator",
+      code: otp,
+    });
 
-    // Later:
-    // await executeEngagementAction(...)
+    await handleExecuteAction(actionRequest);
 
-    setConfirmationOpen(false);
-    setSelectedAction(null);
-    setSelectedEngagement(null);
+    setOtpOpen(false);
+    setActionRequest(null);
+  };
+
+  const handleTryAnotherWay = () => {
+    // TODO:
+    // Later open SMS / Email verification options.
+    console.log("Try another verification method");
   };
 
   const columns = useMemo(
@@ -80,12 +152,33 @@ export function OnboardingLifecycleTable() {
         onOpenChange={setSummaryOpen}
         engagement={onboardingEngagement}
       />
-      <EngagementActionConfirmationDialog
-        open={confirmationOpen}
-        onOpenChange={setConfirmationOpen}
-        action={selectedAction}
-        engagementName={selectedEngagement?.name}
-        onConfirm={handleConfirmAction}
+
+      {/* Action confirmation */}
+      <EngagementActionDialog
+        open={selectedAction !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedAction(null);
+          }
+        }}
+        engagementId={selectedAction?.engagement.engagementId ?? ""}
+        engagementName={selectedAction?.engagement.name ?? ""}
+        action={selectedAction?.action ?? null}
+        onConfirm={handleActionConfirmation}
+      />
+
+      {/* Separate OTP verification */}
+      <EngagementOtpDialog
+        open={otpOpen}
+        onOpenChange={(open) => {
+          setOtpOpen(open);
+
+          if (!open) {
+            setActionRequest(null);
+          }
+        }}
+        onConfirm={handleOtpConfirm}
+        onTryAnotherWay={handleTryAnotherWay}
       />
     </>
   );

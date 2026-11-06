@@ -17,36 +17,45 @@ import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types
 import type {
   EngagementAction,
   EngagementStatus,
-} from "@/app/customer-engagement/components/engagement.type";
+  ActionPermission,
+} from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
 
 type OnboardingLifecycleActionsProps = {
   engagement: OnboardingLifecycleEngagement;
+
   onEdit: (engagement: OnboardingLifecycleEngagement) => void;
+
   onAction: (
     engagement: OnboardingLifecycleEngagement,
     action: EngagementAction,
   ) => void;
+
+  permissions?: ActionPermission;
+};
+
+// Development-only permissions.
+// Replace these with the logged-in user's actual permissions.
+const defaultPermissions: ActionPermission = {
+  edit: true,
+  approve: true,
+  activate: true,
+  pause: true,
+  resume: true,
+  cancel: true,
+  delete: true,
 };
 
 function canEdit(status: EngagementStatus) {
-  return status === "Draft";
+  return status === "Draft" || status === "Pending Approval";
 }
-
-// function canSubmit(status: EngagementStatus) {
-//   return status === "Draft";
-// }
 
 function canApprove(status: EngagementStatus) {
   return status === "Pending Approval";
 }
 
-function canReject(status: EngagementStatus) {
-  return status === "Pending Approval";
+function canActivate(status: EngagementStatus) {
+  return status === "Draft";
 }
-
-// function canWithdraw(status: EngagementStatus) {
-//   return status === "Pending Approval";
-// }
 
 function canPause(status: EngagementStatus) {
   return status === "Active" || status === "Scheduled";
@@ -57,93 +66,98 @@ function canResume(status: EngagementStatus) {
 }
 
 function canCancel(status: EngagementStatus) {
-  return status === "Scheduled" || status === "Active" || status === "Paused";
+  return (
+    status === "Draft" ||
+    status === "Pending Approval" ||
+    status === "Scheduled" ||
+    status === "Active" ||
+    status === "Paused"
+  );
 }
 
 function canDelete(status: EngagementStatus) {
-  return status === "Draft";
-}
-
-function hasAvailableActions(status: EngagementStatus) {
-  return (
-    canEdit(status) ||
-    canApprove(status) ||
-    canReject(status) ||
-    canPause(status) ||
-    canResume(status) ||
-    canCancel(status) ||
-    canDelete(status)
-  );
+  return status === "Draft" || status === "Pending Approval";
 }
 
 export function OnboardingLifecycleActions({
   engagement,
   onEdit,
   onAction,
+  permissions = defaultPermissions,
 }: OnboardingLifecycleActionsProps) {
+  const status = engagement.status;
+
+  const showEdit = canEdit(status) && permissions.edit;
+  const showApprove = canApprove(status) && permissions.approve;
+  const showActivate = canActivate(status) && permissions.activate;
+  const showPause = canPause(status) && permissions.pause;
+  const showResume = canResume(status) && permissions.resume;
+  const showCancel = canCancel(status) && permissions.cancel;
+  const showDelete = canDelete(status) && permissions.delete;
+
+  const hasAvailableActions =
+    showEdit ||
+    showApprove ||
+    showActivate ||
+    showPause ||
+    showResume ||
+    showCancel ||
+    showDelete;
+
+  const hasDestructiveActions = showCancel || showDelete;
+
+  if (!hasAvailableActions) {
+    return (
+      <Button variant="ghost" size="icon" className="size-8" disabled>
+        <MoreHorizontal className="size-4" />
+        <span className="sr-only">No available actions</span>
+      </Button>
+    );
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8"
-          disabled={!hasAvailableActions(engagement.status)}
-        >
+        <Button variant="ghost" size="icon" className="size-8">
           <MoreHorizontal className="size-4" />
-
           <span className="sr-only">Open actions</span>
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-52">
-        {canEdit(engagement.status) && (
+        {showEdit && (
           <DropdownMenuItem onClick={() => onEdit(engagement)}>
             Edit
           </DropdownMenuItem>
         )}
 
-        {/* {canSubmit(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "submit")}>
-            Submit for Approval
-          </DropdownMenuItem>
-        )} */}
-
-        {canApprove(engagement.status) && (
+        {showApprove && (
           <DropdownMenuItem onClick={() => onAction(engagement, "approve")}>
             Approve
           </DropdownMenuItem>
         )}
 
-        {canReject(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "reject")}>
-            Reject
+        {showActivate && (
+          <DropdownMenuItem onClick={() => onAction(engagement, "activate")}>
+            Activate
           </DropdownMenuItem>
         )}
 
-        {/* {canWithdraw(engagement.status) && (
-          <DropdownMenuItem onClick={() => onAction(engagement, "withdraw")}>
-            Withdraw
-          </DropdownMenuItem>
-        )} */}
-
-        {canPause(engagement.status) && (
+        {showPause && (
           <DropdownMenuItem onClick={() => onAction(engagement, "pause")}>
             Pause
           </DropdownMenuItem>
         )}
 
-        {canResume(engagement.status) && (
+        {showResume && (
           <DropdownMenuItem onClick={() => onAction(engagement, "resume")}>
             Resume
           </DropdownMenuItem>
         )}
 
-        {(canCancel(engagement.status) || canDelete(engagement.status)) && (
-          <DropdownMenuSeparator />
-        )}
+        {hasDestructiveActions && <DropdownMenuSeparator />}
 
-        {canCancel(engagement.status) && (
+        {showCancel && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={() => onAction(engagement, "cancel")}
@@ -152,7 +166,7 @@ export function OnboardingLifecycleActions({
           </DropdownMenuItem>
         )}
 
-        {canDelete(engagement.status) && (
+        {showDelete && (
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={() => onAction(engagement, "delete")}

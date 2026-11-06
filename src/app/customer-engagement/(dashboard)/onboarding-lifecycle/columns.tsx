@@ -1,25 +1,26 @@
 "use client";
 
-import { tableFeatures, type ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Eye } from "lucide-react";
 
 import type { OnboardingLifecycleEngagement } from "./onboarding-lifecycle.types";
+import type { EngagementAction } from "@/app/customer-engagement/components/engagement-actions/engagement-action.types";
+
 import { dataTableFeatures } from "@/app/customer-engagement/components/data-table/data-table.features";
 import { EngagementStatusBadge } from "@/app/customer-engagement/components/engagement-status-badge";
 import { EngagementPriorityBadge } from "@/app/customer-engagement/components/engagement-priority-badge";
-import { EngagementAction } from "@/app/customer-engagement/components/engagement.type";
 import { Button } from "@/components/ui/button";
 import { OnboardingLifecycleActions } from "./onboarding-lifecycle-actions";
-import { Eye } from "lucide-react";
+
 type GetColumnsProps = {
   onView: (engagement: OnboardingLifecycleEngagement) => void;
-
   onEdit: (engagement: OnboardingLifecycleEngagement) => void;
-
   onAction: (
     engagement: OnboardingLifecycleEngagement,
     action: EngagementAction,
   ) => void;
 };
+
 export function getOnboardingLifecycleColumns({
   onView,
   onEdit,
